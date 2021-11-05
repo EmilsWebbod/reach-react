@@ -2,8 +2,8 @@
   "name": "@ewb/reach-react",
   "version": "0.0.1",
   "description": "React Resource and Fetch stuff",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "start": "yarn build:watch",
     "build": "tsc --incremental",

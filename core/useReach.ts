@@ -10,7 +10,10 @@ interface IUseReachState<T, E> {
   error?: E;
 }
 
-export function useReach<T, E = any>(path: string, props: IUseReachProps) {
+export function useReach<T, E = any>(
+  path: string,
+  props?: IUseReachProps
+): [boolean, T | undefined, E | undefined, () => void] {
   const init = React.useRef(false);
   const service = React.useContext(ReachContext);
   const [state, setState] = React.useState<IUseReachState<T, E>>({ busy: true });
