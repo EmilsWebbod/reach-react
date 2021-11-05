@@ -1,0 +1,58 @@
+{
+  "name": "@ewb/reach-react",
+  "version": "0.0.1",
+  "description": "React Resource and Fetch stuff",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "start": "yarn build:watch",
+    "build": "tsc --incremental",
+    "build:watch": "tsc --watch --incremental",
+    "lint": "tslint --project \"./tsconfig.json\"",
+    "postversion": "git push && git push --tags",
+    "prepublish": "npm run build",
+    "preversion": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EmilsWebbod/reach-react.git"
+  },
+  "keywords": [
+    "typescript",
+    "ts",
+    "react",
+    "reach",
+    "npm",
+    "fetch",
+    "crud",
+    "api"
+  ],
+  "author": "Ludens reklamebyrå",
+  "bugs": {
+    "url": "https://github.com/EmilsWebbod/reach-react/issues"
+  },
+  "homepage": "https://github.com/EmilsWebbod/reach-react#readme",
+  "files": [
+    "index.ts",
+    "core"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.3",
+    "husky": "^4.2.5",
+    "prettier": "^2.0.4",
+    "pretty-quick": "^2.0.1",
+    "react": "^17.0.2",
+    "typescript": "^4.2.4"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0"
+  },
+  "dependencies": {
+    "@ewb/reach": "^0.0.1"
+  }
+}
