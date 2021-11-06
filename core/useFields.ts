@@ -17,11 +17,11 @@ export type IUseFieldValueRet<T extends object, K extends keyof T, P extends obj
 } & P;
 
 export type IUseFieldRet<T extends object, P extends object, E> = [
-  IUseFieldState<T, E>,
-  <K extends keyof T>(key: K) => IUseFieldValueRet<T, K, P>,
-  IUseCrudSetFn<T>,
-  IUseCrudSaveFn,
-  IUseCrudSetDataFn<T>
+  busy: IUseFieldState<T, E>,
+  getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T, K, P>,
+  setField: IUseCrudSetFn<T>,
+  save: IUseCrudSaveFn,
+  set: IUseCrudSetDataFn<T>
 ];
 
 export function useFields<T extends object, P extends object, E = any>(

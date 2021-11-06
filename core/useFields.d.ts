@@ -12,10 +12,10 @@ export declare type IUseFieldValueRet<T extends object, K extends keyof T, P ext
     value: T[K];
 } & P;
 export declare type IUseFieldRet<T extends object, P extends object, E> = [
-    IUseFieldState<T, E>,
-    <K extends keyof T>(key: K) => IUseFieldValueRet<T, K, P>,
-    IUseCrudSetFn<T>,
-    IUseCrudSaveFn,
-    IUseCrudSetDataFn<T>
+    busy: IUseFieldState<T, E>,
+    getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T, K, P>,
+    setField: IUseCrudSetFn<T>,
+    save: IUseCrudSaveFn,
+    set: IUseCrudSetDataFn<T>
 ];
 export declare function useFields<T extends object, P extends object, E = any>(path: string, data: Partial<T>, fields: IUseFieldEdit<T, P>, props: IUseCrudProps<T>): IUseFieldRet<T, P, E>;

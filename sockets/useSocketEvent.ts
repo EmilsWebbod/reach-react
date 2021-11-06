@@ -1,20 +1,19 @@
-import { useContext, useEffect, useRef } from 'react';
-import { ReachSocketConnection } from './SocketConnection';
+import { useContext, useEffect } from 'react';
 import { ReachSocketContext } from './ReachSocketContext';
+import { ReachNamespaceContext } from './ReachNamespaceContext';
 
-export function useSocketEvent<T>(namespace?: string, event?: string, fn?: (...args: any[]) => void) {
-  const socket = useRef<ReachSocketConnection<T> | null>(null);
+export function useSocketEvent<T>(event?: string, fn?: (...args: any[]) => void) {
+  const socketConnection = useContext(ReachNamespaceContext);
   const { addConnection } = useContext(ReachSocketContext);
 
   useEffect(() => {
-    if (event && fn) {
-      socket.current = addConnection(namespace);
-      const ret = socket.current.on(event, fn);
+    if (socketConnection && event && fn) {
+      const ret = socketConnection.on(event, fn);
       return () => {
         ret.off(event, fn);
       };
     }
-  }, [socket, namespace, event, fn, addConnection]);
+  }, [socketConnection, event, fn, addConnection]);
 
-  return socket;
+  return socketConnection;
 }

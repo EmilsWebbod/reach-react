@@ -2,6 +2,21 @@ import { ReachSocketConnection, SocketConnectionBroadcastFn, SocketConnectionFil
 import { useContext, useEffect, useRef } from 'react';
 import { ReachSocketContext } from './ReachSocketContext';
 
+export interface IUseSocketProps<T extends object, B extends any[]> {
+  namespace: string | ((data: T) => string);
+  event: string | ((data: T) => string);
+  toData: (...data: B) => Partial<T>;
+  filter: (data: T) => SocketConnectionFilterFn<B>;
+}
+
+export const userSocketPropsToParams = <T extends object, B extends any[]>(
+  props: IUseSocketProps<T, B>,
+  data: T
+): [string, string] => [
+  typeof props.namespace === 'function' ? props.namespace(data) : props.namespace,
+  typeof props.event === 'function' ? props.event(data) : props.event,
+];
+
 export function useSocketNamespace<T extends any[]>(
   namespace?: string,
   event?: string,

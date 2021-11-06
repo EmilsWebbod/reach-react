@@ -1,8 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useSocketNamespace = void 0;
+exports.useSocketNamespace = exports.userSocketPropsToParams = void 0;
 const react_1 = require("react");
 const ReachSocketContext_1 = require("./ReachSocketContext");
+const userSocketPropsToParams = (props, data) => [
+    typeof props.namespace === 'function' ? props.namespace(data) : props.namespace,
+    typeof props.event === 'function' ? props.event(data) : props.event,
+];
+exports.userSocketPropsToParams = userSocketPropsToParams;
 function useSocketNamespace(namespace, event, broadcast, filter) {
     const socket = react_1.useRef(null);
     const { addConnection, removeConnection } = react_1.useContext(ReachSocketContext_1.ReachSocketContext);

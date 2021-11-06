@@ -2,7 +2,7 @@ import * as React from 'react';
 import { IReachOptions, Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
 
-interface IUseReachProps extends IReachOptions {}
+export interface IUseReachProps extends IReachOptions {}
 
 interface IUseReachState<T, E> {
   busy: boolean;
@@ -10,10 +10,9 @@ interface IUseReachState<T, E> {
   error?: E;
 }
 
-export function useReach<T, E = any>(
-  path: string,
-  props?: IUseReachProps
-): [boolean, T | undefined, E | undefined, () => void] {
+export type IUseReachRet<T, E> = [busy: boolean, data: T | undefined, error: E | undefined, fetch: () => void];
+
+export function useReach<T, E = any>(path: string, props?: IUseReachProps): IUseReachRet<T, E> {
   const init = React.useRef(false);
   const service = React.useContext(ReachContext);
   const [state, setState] = React.useState<IUseReachState<T, E>>({ busy: true });

@@ -11,9 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useSearch = void 0;
 const React = require("react");
+const react_1 = require("react");
 const reach_1 = require("@ewb/reach");
 const ReachContext_1 = require("./ReachContext");
-const react_1 = require("react");
 function useSearch(path, props) {
     const { limit = 10, responseToData, reachOptions } = props;
     const init = React.useRef(false);
@@ -59,27 +59,27 @@ function useSearch(path, props) {
     }), [state.limit, state.skip, state.count]);
     const actions = React.useMemo(() => ({
         unshift: (...items) => {
-            setState((s) => (Object.assign(Object.assign({}, s), { items: [...items, ...s.items] })));
+            setState((s) => (Object.assign(Object.assign({}, s), { items: [...items, ...s.items], count: s.count + items.length })));
         },
         splice: (start, deleteCount = 1, ...items) => {
             setState((s) => {
                 s.items.splice(start, deleteCount, ...items);
-                return Object.assign(Object.assign({}, s), { items: [...s.items] });
+                return Object.assign(Object.assign({}, s), { items: [...s.items], count: s.count - deleteCount + items.length });
             });
         },
         push: (...items) => {
             setState((s) => {
-                return Object.assign(Object.assign({}, s), { items: [...s.items, ...items] });
+                return Object.assign(Object.assign({}, s), { items: [...s.items, ...items], count: s.count + items.length });
             });
         },
         search: (query) => search(0, query),
     }), [search]);
     React.useEffect(() => {
-        if (!init.current) {
+        if (!init.current && !props.disableInit) {
             init.current = true;
             search(0).then();
         }
-    }, [search]);
+    }, [search, props.disableInit]);
     return React.useMemo(() => [state.busy, state.items, state.error, next, info, actions], [state.busy, state.items, state.error, next, info, actions]);
 }
 exports.useSearch = useSearch;

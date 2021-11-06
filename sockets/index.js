@@ -10,7 +10,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+__exportStar(require("./ReachNamespaceContext"), exports);
 __exportStar(require("./ReachSocketContext"), exports);
 __exportStar(require("./useSocketEvent"), exports);
 __exportStar(require("./useSocketFields"), exports);
 __exportStar(require("./useSocketNamespace"), exports);
+__exportStar(require("./useSocketSearch"), exports);

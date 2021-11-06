@@ -1,33 +1,24 @@
 import { IUseCrudProps, IUseFieldEdit, IUseFieldRet, useFields } from '../core';
 import { useMemo } from 'react';
-import { useSocketNamespace } from './useSocketNamespace';
-import { SocketConnectionBroadcastFn, SocketConnectionFilterFn } from './SocketConnection';
+import { IUseSocketProps, userSocketPropsToParams, useSocketNamespace } from './useSocketNamespace';
 
 interface FieldsProps<T extends object, P extends object> {
   fields: IUseFieldEdit<T, P>;
   props: IUseCrudProps<T>;
 }
 
-interface SocketProps<T extends object, B extends any[]> {
-  namespace: string | ((data: T) => string);
-  event: string;
-  toData: (...data: B) => Partial<T>;
-  filter: SocketConnectionFilterFn<B>;
-}
-
 export function useSocketFields<T extends object, P extends object, E = any>(
   path: string,
   data: Partial<T>,
   fields: FieldsProps<T, P>,
-  socketProps: SocketProps<T, any[]>
+  socketProps: IUseSocketProps<T, any[]>
 ): IUseFieldRet<T, P, E> {
   const [state, getField, set, save, setData] = useFields(path, data, fields.fields, fields.props);
 
   useSocketNamespace(
-    typeof socketProps.namespace === 'function' ? socketProps.namespace(state.data) : socketProps.namespace,
-    socketProps.event,
-    (...event) => setData(socketProps.toData(...event)),
-    socketProps.filter
+    ...userSocketPropsToParams<T, any[]>(socketProps, state.data),
+    socketProps.toData,
+    socketProps.filter(state.data)
   );
 
   return useMemo(() => [state, getField, set, save, setData], [state, getField, set, save, setData]);

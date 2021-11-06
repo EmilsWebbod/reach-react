@@ -1,10 +1,11 @@
-import { ChangeEvent, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
 
 export interface IUseCrudProps<T extends object> {
   idKey: keyof T;
   disableAutoSave?: boolean;
+  initWithGet?: boolean;
 }
 
 export interface IUseCrudState<T, E> {
@@ -19,6 +20,11 @@ type Edited<T> = {
   [key in keyof T]?: boolean;
 };
 
+export interface IUseCrudActions {
+  read: () => void;
+  delete: () => void;
+}
+
 type ValidEvents = HTMLInputElement | HTMLTextAreaElement;
 export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
   key: K
@@ -26,10 +32,11 @@ export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
 export type IUseCrudSaveFn = () => Promise<void>;
 export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>) => void;
 export type IUseCrudRet<T extends object, E> = [
-  IUseCrudState<T, E>,
-  IUseCrudSetFn<T>,
-  IUseCrudSaveFn,
-  IUseCrudSetDataFn<T>
+  state: IUseCrudState<T, E>,
+  setField: IUseCrudSetFn<T>,
+  save: IUseCrudSaveFn,
+  set: IUseCrudSetDataFn<T>,
+  actions: IUseCrudActions
 ];
 
 export function useCrud<T extends object, E = any>(
@@ -39,11 +46,27 @@ export function useCrud<T extends object, E = any>(
 ): IUseCrudRet<T, E> {
   const service = useContext(ReachContext);
   const reach = useMemo(() => new Reach(service), [service]);
+  const init = useRef(false);
   const initialData = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
   const defaultState = useMemo(() => getNewState(initialData), [initialData]);
   const ref = useRef<IUseCrudState<T, E>>(defaultState);
   const queue = useRef<IUseCrudState<T, E>[]>([]);
   const [state, setState] = useState<IUseCrudState<T, E>>(defaultState);
+  const id = useMemo(() => state.data[props.idKey], [state.data, props.idKey]);
+  const endpoint = useMemo(() => `${path}/${id}`, [path, id]);
+
+  const fetch = useCallback(
+    (method: 'GET' | 'DELETE') => async () => {
+      try {
+        const data = await reach.api<T>(endpoint, { method });
+        ref.current = getNewState(data);
+        setState(ref.current);
+      } catch (error) {
+        setState((s) => ({ ...s, busy: false, error }));
+      }
+    },
+    [reach, endpoint]
+  );
 
   const patch = useCallback(
     async (state: IUseCrudState<T, E>) => {
@@ -113,10 +136,19 @@ export function useCrud<T extends object, E = any>(
   const save = useCallback(() => patch(ref.current), [patch]);
 
   const setData = useCallback((data: Partial<T>) => {
-    setState((s) => getNewState({ ...s.data, ...data }));
+    setState((s) => getNewState({ ...s.data, ...data }, s.edited));
   }, []);
 
-  return [state, set, save, setData];
+  const actions = useMemo(() => ({ read: fetch('GET'), delete: fetch('DELETE') }), [fetch]);
+
+  useEffect(() => {
+    if (!init.current && props.initWithGet && id) {
+      init.current = true;
+      actions.read();
+    }
+  }, [props.initWithGet, id, actions.read]);
+
+  return [state, set, save, setData, actions];
 }
 
 function getPatchData<T extends object, E>(state: IUseCrudState<T, E>) {
@@ -129,11 +161,11 @@ function getPatchData<T extends object, E>(state: IUseCrudState<T, E>) {
   return patchData;
 }
 
-function getNewState<T>(data: Partial<T>) {
+function getNewState<T>(data: Partial<T>, edited: Edited<T> = {}) {
   return {
     busy: false,
     data,
     initialData: data,
-    edited: {},
+    edited,
   };
 }

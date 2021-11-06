@@ -1,13 +1,14 @@
 import * as React from 'react';
+import { useCallback } from 'react';
 import { IReachOptions, IReachQuery, Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
-import { useCallback } from 'react';
 
-export interface IUseReachProps<T, RES> {
+export interface IUseSearchProps<T, RES> {
   limit?: number;
   query?: IReachOptions['query'];
   responseToData?: (body: RES) => Pick<IUseReachState<T, any>, 'count' | 'items'>;
   reachOptions?: Omit<IReachOptions, 'query'>;
+  disableInit?: boolean;
 }
 
 interface IUseReachState<T, E> extends IUseReachInfo {
@@ -30,10 +31,16 @@ export interface IUseReachActions<T> {
   search: (fetchQuery: IReachQuery) => void;
 }
 
-export function useSearch<T, E = any, RES = T[]>(
-  path: string,
-  props: IUseReachProps<T, RES>
-): [boolean, T[], E | undefined, () => void, IUseReachInfo, IUseReachActions<T>] {
+export type IUseSearchRet<T, E> = [
+  busy: boolean,
+  data: T[],
+  error: E | undefined,
+  next: () => void,
+  info: IUseReachInfo,
+  actions: IUseReachActions<T>
+];
+
+export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearchProps<T, RES>): IUseSearchRet<T, E> {
   const { limit = 10, responseToData, reachOptions } = props;
   const init = React.useRef(false);
   const service = React.useContext(ReachContext);
@@ -99,17 +106,17 @@ export function useSearch<T, E = any, RES = T[]>(
   const actions = React.useMemo(
     () => ({
       unshift: (...items: T[]) => {
-        setState((s) => ({ ...s, items: [...items, ...s.items] }));
+        setState((s) => ({ ...s, items: [...items, ...s.items], count: s.count + items.length }));
       },
       splice: (start: number, deleteCount: number = 1, ...items: T[]) => {
         setState((s) => {
           s.items.splice(start, deleteCount, ...items);
-          return { ...s, items: [...s.items] };
+          return { ...s, items: [...s.items], count: s.count - deleteCount + items.length };
         });
       },
       push: (...items: T[]) => {
         setState((s) => {
-          return { ...s, items: [...s.items, ...items] };
+          return { ...s, items: [...s.items, ...items], count: s.count + items.length };
         });
       },
       search: (query: IReachQuery) => search(0, query),
@@ -118,11 +125,11 @@ export function useSearch<T, E = any, RES = T[]>(
   );
 
   React.useEffect(() => {
-    if (!init.current) {
+    if (!init.current && !props.disableInit) {
       init.current = true;
       search(0).then();
     }
-  }, [search]);
+  }, [search, props.disableInit]);
 
   return React.useMemo(
     () => [state.busy, state.items, state.error, next, info, actions],

@@ -12,3 +12,4 @@ src/
 .env
 
 yarn-error.log
+tsconfig.tsbuildinfo

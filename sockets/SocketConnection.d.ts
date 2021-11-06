@@ -15,7 +15,7 @@ export declare class ReachSocketConnection<T> {
     constructor(url: string, namespace?: string, event?: string, opts?: SocketConnectionOpts);
     subscribe<O extends any[]>(callback: SocketConnectionBroadcastFn<O>, filter?: SocketConnectionFilterFn<O>): () => void;
     emit(event: string, ...args: any[]): void;
-    on(event: string, fn: (...args: any[]) => void): Socket<import("socket.io-client/build/typed-events").DefaultEventsMap, import("socket.io-client/build/typed-events").DefaultEventsMap>;
+    on(event: string, fn: (...args: any[]) => void): Socket<import("@socket.io/component-emitter").DefaultEventsMap, import("@socket.io/component-emitter").DefaultEventsMap>;
     disconnect(): void;
     private init;
 }
