@@ -5,6 +5,7 @@ export interface IUseCrudProps<T extends object> {
     initWithGet?: boolean;
 }
 export interface IUseCrudState<T, E> {
+    endpoint: string;
     busy: boolean;
     data: Partial<T>;
     initialData: Partial<T>;

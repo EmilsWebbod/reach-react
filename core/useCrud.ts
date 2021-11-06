@@ -9,6 +9,7 @@ export interface IUseCrudProps<T extends object> {
 }
 
 export interface IUseCrudState<T, E> {
+  endpoint: string;
   busy: boolean;
   data: Partial<T>;
   initialData: Partial<T>;
@@ -49,7 +50,10 @@ export function useCrud<T extends object, E = any>(
   const reach = useMemo(() => new Reach(service), [service]);
   const init = useRef(false);
   const initialData = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
-  const defaultState = useMemo(() => getNewState(initialData), [initialData]);
+  const defaultState = useMemo(
+    () => getNewState(`${path}/${initialData[props.idKey] || ''}`, initialData),
+    [path, props.idKey, initialData]
+  );
   const ref = useRef<IUseCrudState<T, E>>(defaultState);
   const queue = useRef<IUseCrudState<T, E>[]>([]);
   const [state, setState] = useState<IUseCrudState<T, E>>(defaultState);
@@ -60,7 +64,7 @@ export function useCrud<T extends object, E = any>(
     (method: 'GET' | 'DELETE') => async () => {
       try {
         const data = await reach.api<T>(endpoint, { method });
-        ref.current = getNewState(data);
+        ref.current = getNewState(endpoint, data);
         setState(ref.current);
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
@@ -90,7 +94,7 @@ export function useCrud<T extends object, E = any>(
         let data;
         if (id) {
           const body = getPatchData(state);
-          data = await reach.api(`${path}/${id}`, { method: 'PATCH', body });
+          data = await reach.api(endpoint, { method: 'PATCH', body });
         } else {
           data = await reach.api(path, { method: 'POST', body: ref.current.data });
         }
@@ -101,7 +105,7 @@ export function useCrud<T extends object, E = any>(
           ref.current.busy = false;
           await patch(patchState);
         } else {
-          ref.current = getNewState(data);
+          ref.current = getNewState(endpoint, data);
           setState(ref.current);
         }
       } catch (error) {
@@ -109,7 +113,7 @@ export function useCrud<T extends object, E = any>(
         ref.current.busy = false;
       }
     },
-    [reach, props.idKey]
+    [reach, endpoint, props.idKey]
   );
 
   const set = useCallback(
@@ -136,9 +140,12 @@ export function useCrud<T extends object, E = any>(
 
   const save = useCallback(() => patch(ref.current), [patch]);
 
-  const setData = useCallback((data: Partial<T>) => {
-    setState((s) => getNewState({ ...s.data, ...data }, s.edited));
-  }, []);
+  const setData = useCallback(
+    (data: Partial<T>) => {
+      setState((s) => getNewState(endpoint, { ...s.data, ...data }, s.edited));
+    },
+    [endpoint]
+  );
 
   const actions = useMemo(() => ({ read: fetch('GET'), delete: fetch('DELETE') }), [fetch]);
 
@@ -162,8 +169,9 @@ function getPatchData<T extends object, E>(state: IUseCrudState<T, E>) {
   return patchData;
 }
 
-function getNewState<T>(data: Partial<T>, edited: Edited<T> = {}) {
+function getNewState<T>(endpoint: string, data: Partial<T>, edited: Edited<T> = {}) {
   return {
+    endpoint,
     busy: false,
     data,
     initialData: data,

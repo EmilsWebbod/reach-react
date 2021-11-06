@@ -18,7 +18,7 @@ function useCrud(path, data, props) {
     const reach = react_1.useMemo(() => new reach_1.Reach(service), [service]);
     const init = react_1.useRef(false);
     const initialData = react_1.useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
-    const defaultState = react_1.useMemo(() => getNewState(initialData), [initialData]);
+    const defaultState = react_1.useMemo(() => getNewState(`${path}/${initialData[props.idKey] || ''}`, initialData), [path, props.idKey, initialData]);
     const ref = react_1.useRef(defaultState);
     const queue = react_1.useRef([]);
     const [state, setState] = react_1.useState(defaultState);
@@ -27,7 +27,7 @@ function useCrud(path, data, props) {
     const fetch = react_1.useCallback((method) => () => __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield reach.api(endpoint, { method });
-            ref.current = getNewState(data);
+            ref.current = getNewState(endpoint, data);
             setState(ref.current);
         }
         catch (error) {
@@ -51,7 +51,7 @@ function useCrud(path, data, props) {
             let data;
             if (id) {
                 const body = getPatchData(state);
-                data = yield reach.api(`${path}/${id}`, { method: 'PATCH', body });
+                data = yield reach.api(endpoint, { method: 'PATCH', body });
             }
             else {
                 data = yield reach.api(path, { method: 'POST', body: ref.current.data });
@@ -63,7 +63,7 @@ function useCrud(path, data, props) {
                 yield patch(patchState);
             }
             else {
-                ref.current = getNewState(data);
+                ref.current = getNewState(endpoint, data);
                 setState(ref.current);
             }
         }
@@ -71,7 +71,7 @@ function useCrud(path, data, props) {
             setState((s) => (Object.assign(Object.assign({}, s), { busy: false, error })));
             ref.current.busy = false;
         }
-    }), [reach, props.idKey]);
+    }), [reach, endpoint, props.idKey]);
     const set = react_1.useCallback((key, disableAutoSave = props.disableAutoSave) => (event) => {
         const value = event && typeof event === 'object' && 'target' in event ? event.target.value : event;
         setState((s) => {
@@ -84,8 +84,8 @@ function useCrud(path, data, props) {
     }, [props.disableAutoSave, patch]);
     const save = react_1.useCallback(() => patch(ref.current), [patch]);
     const setData = react_1.useCallback((data) => {
-        setState((s) => getNewState(Object.assign(Object.assign({}, s.data), data), s.edited));
-    }, []);
+        setState((s) => getNewState(endpoint, Object.assign(Object.assign({}, s.data), data), s.edited));
+    }, [endpoint]);
     const actions = react_1.useMemo(() => ({ read: fetch('GET'), delete: fetch('DELETE') }), [fetch]);
     react_1.useEffect(() => {
         if (!init.current && props.initWithGet && id) {
@@ -105,8 +105,9 @@ function getPatchData(state) {
     }
     return patchData;
 }
-function getNewState(data, edited = {}) {
+function getNewState(endpoint, data, edited = {}) {
     return {
+        endpoint,
         busy: false,
         data,
         initialData: data,
