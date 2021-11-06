@@ -173,11 +173,11 @@
         "affectsGlobalScope": false
       },
       "../reach/core/reachservice.ts": {
-        "version": "a8f9e0b7d430256c344b661b1d3bb76d1ca7f2dc9d60b089102597427ed03cc7",
+        "version": "e4c7af4366aa1e464011bc41c18234956c54d75dd1ea051ee4fdf511dab6d6c6",
         "affectsGlobalScope": false
       },
       "../reach/core/reach.ts": {
-        "version": "b395f0973fd9eb1f40194e044be70d176e028005306ee681c6b45711b9af8a95",
+        "version": "b9ffa7c5dcf9a7cc16865b77d851f77643b19e453a6e2176120619f8827f767c",
         "affectsGlobalScope": false
       },
       "../reach/core/index.ts": {
@@ -215,13 +215,13 @@
         "affectsGlobalScope": false
       },
       "./core/usecrud.ts": {
-        "version": "60a626eb9288661b0f947d7248d80ba4560660ed582249ff2fa51a731018f5d6",
-        "signature": "246077a14ea281f00af8febed5581b86d699d2e2bcaf9f11c96524e3bac616f7",
+        "version": "1474a183dabfd4ed7c59f8664d900bd2b7c14e2f3205753c5b9ecd6234cb372c",
+        "signature": "8cc97dfa1dd1c7d166e70326d6bf675304385d92dc5a28f8d0ae7f51033ae1b0",
         "affectsGlobalScope": false
       },
       "./core/usefields.ts": {
-        "version": "946570d2e270dbea0de4c63cf9704db3dc9956aac4641705938c6e3e9b3e421d",
-        "signature": "40812f8ac7276981b87338290d86e204afe8c2b49e5b8b06d6e42aa26e41571e",
+        "version": "6d12b89b71642980d12a094cf6a1d3336fe47ee6b40a8e100e222f74e252a0d9",
+        "signature": "31ca7d855c4056bacc71fdb437ec696dbed8ea1fd1e9ea6877a7a30a9112b455",
         "affectsGlobalScope": false
       },
       "./core/usereach.ts": {
@@ -242,6 +242,71 @@
       "./index.ts": {
         "version": "097a3db0ba586754cc7561bf5fe0d1ac41afe1da8d2b01ba345e1b98308b51e1",
         "signature": "0d1c0fd74e525a707b6ea0614b6cc18df430f1e7ff2a4fbc257bc8a6ba5e4c40",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/@types/component-emitter/index.d.ts": {
+        "version": "567a315b240a060518c532d38a46803b6d35e75dc14a9be435b6dc20c816741e",
+        "signature": "567a315b240a060518c532d38a46803b6d35e75dc14a9be435b6dc20c816741e",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/socket.io-parser/dist/index.d.ts": {
+        "version": "6ce9c4c7d976960a7f14dfe40e26c357bcab9405eb2eea38f79760ed4f323512",
+        "signature": "6ce9c4c7d976960a7f14dfe40e26c357bcab9405eb2eea38f79760ed4f323512",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/socket.io-client/build/typed-events.d.ts": {
+        "version": "373696bf4fe02ed978834a3ffa18e1a76c8a56d70ad091eaa1b7c22b2b475a14",
+        "signature": "373696bf4fe02ed978834a3ffa18e1a76c8a56d70ad091eaa1b7c22b2b475a14",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/socket.io-client/build/socket.d.ts": {
+        "version": "d59043f4fe30fc72b2af5e66bd8fe0bc26cbcf54891dc97e9a9496046108897e",
+        "signature": "d59043f4fe30fc72b2af5e66bd8fe0bc26cbcf54891dc97e9a9496046108897e",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/socket.io-client/build/manager.d.ts": {
+        "version": "12c672c66f6d09cc6ff587e5d04d3f94d6bd1a6d7c1bdd506e5a8e4503f6080a",
+        "signature": "12c672c66f6d09cc6ff587e5d04d3f94d6bd1a6d7c1bdd506e5a8e4503f6080a",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/socket.io-client/build/index.d.ts": {
+        "version": "f75c7232e4cbfefc949eea9cdfca50cd9ff16c9c8274f70aaeb680c9b6eb6e04",
+        "signature": "f75c7232e4cbfefc949eea9cdfca50cd9ff16c9c8274f70aaeb680c9b6eb6e04",
+        "affectsGlobalScope": false
+      },
+      "./node_modules/@types/uuid/index.d.ts": {
+        "version": "fab58e600970e66547644a44bc9918e3223aa2cbd9e8763cec004b2cfb48827e",
+        "signature": "fab58e600970e66547644a44bc9918e3223aa2cbd9e8763cec004b2cfb48827e",
+        "affectsGlobalScope": false
+      },
+      "./sockets/socketconnection.ts": {
+        "version": "d328b378cc70a81b9dcbe68e41ef28e4967cfd5594795546b32bf8c0f3d76705",
+        "signature": "644a584bf186d5e2a3724de1b8e2539318593653702cf9c6eeba0a8cb34bc9bb",
+        "affectsGlobalScope": false
+      },
+      "./sockets/reachsocketcontext.tsx": {
+        "version": "855d2e06027efd13675b7a818e7d4617317ce39e11e6d35de08a327094631482",
+        "signature": "3e46bb29e2c165ed86e7b4bcbbe54a017a63512f0a25aba527d2c6b1ecc7d582",
+        "affectsGlobalScope": false
+      },
+      "./sockets/usesocketevent.ts": {
+        "version": "f8c8730953bea6e610dcebe18d580fc7d97897a4dd29302e86e4b1f65c5b4996",
+        "signature": "fe01197d6ae2fc2996e2d063893c03f3f4edcdce8c2d7fa8897dba665bfa1166",
+        "affectsGlobalScope": false
+      },
+      "./sockets/usesocketnamespace.ts": {
+        "version": "58c8609e50ca61cca19aeef2be58b8e60c4eba9b1e0beed1c99dc89190d3e6c6",
+        "signature": "1a2daa1a518fc74215f0879684789f2247f03632f88cef4b6d5406aa6c37e852",
+        "affectsGlobalScope": false
+      },
+      "./sockets/usesocketfields.ts": {
+        "version": "f5e575c8556388460f63f3f777ee1c16e7433f24f311107b8f72c53c92461b26",
+        "signature": "dbdba585ff4a8b0a76966d94d6f5a102def4b75689c83bdd5f497a5e02cb732c",
+        "affectsGlobalScope": false
+      },
+      "./sockets/index.ts": {
+        "version": "688350116adc5f5de7ef69923920f214bf629744378b7bbbf1d4197c2f25db50",
+        "signature": "cdd01796d96994497a8ca91a9494d4725862a6d7b749d97dc9ddf7a16103041a",
         "affectsGlobalScope": false
       },
       "./node_modules/@types/color-name/index.d.ts": {
@@ -270,6 +335,7 @@
       "module": 1,
       "declaration": true,
       "strict": true,
+      "jsx": 2,
       "watch": true,
       "incremental": true,
       "configFilePath": "./tsconfig.json"
@@ -313,6 +379,58 @@
         "./node_modules/@types/prop-types/index.d.ts",
         "./node_modules/@types/react/global.d.ts",
         "./node_modules/csstype/index.d.ts"
+      ],
+      "./node_modules/socket.io-client/build/index.d.ts": [
+        "./node_modules/socket.io-client/build/manager.d.ts",
+        "./node_modules/socket.io-client/build/socket.d.ts",
+        "./node_modules/socket.io-parser/dist/index.d.ts"
+      ],
+      "./node_modules/socket.io-client/build/manager.d.ts": [
+        "./node_modules/socket.io-client/build/socket.d.ts",
+        "./node_modules/socket.io-client/build/typed-events.d.ts",
+        "./node_modules/socket.io-parser/dist/index.d.ts"
+      ],
+      "./node_modules/socket.io-client/build/socket.d.ts": [
+        "./node_modules/socket.io-client/build/manager.d.ts",
+        "./node_modules/socket.io-client/build/typed-events.d.ts",
+        "./node_modules/socket.io-parser/dist/index.d.ts"
+      ],
+      "./node_modules/socket.io-client/build/typed-events.d.ts": [
+        "./node_modules/@types/component-emitter/index.d.ts"
+      ],
+      "./node_modules/socket.io-parser/dist/index.d.ts": [
+        "./node_modules/@types/component-emitter/index.d.ts"
+      ],
+      "./sockets/index.ts": [
+        "./sockets/reachsocketcontext.tsx",
+        "./sockets/usesocketevent.ts",
+        "./sockets/usesocketfields.ts",
+        "./sockets/usesocketnamespace.ts"
+      ],
+      "./sockets/reachsocketcontext.tsx": [
+        "./core/index.ts",
+        "./node_modules/@types/react/index.d.ts",
+        "./sockets/socketconnection.ts"
+      ],
+      "./sockets/socketconnection.ts": [
+        "./node_modules/@types/uuid/index.d.ts",
+        "./node_modules/socket.io-client/build/index.d.ts"
+      ],
+      "./sockets/usesocketevent.ts": [
+        "./node_modules/@types/react/index.d.ts",
+        "./sockets/reachsocketcontext.tsx",
+        "./sockets/socketconnection.ts"
+      ],
+      "./sockets/usesocketfields.ts": [
+        "./core/index.ts",
+        "./node_modules/@types/react/index.d.ts",
+        "./sockets/socketconnection.ts",
+        "./sockets/usesocketnamespace.ts"
+      ],
+      "./sockets/usesocketnamespace.ts": [
+        "./node_modules/@types/react/index.d.ts",
+        "./sockets/reachsocketcontext.tsx",
+        "./sockets/socketconnection.ts"
       ],
       "../reach/core/index.ts": [
         "../reach/core/reach.ts",
@@ -372,6 +490,52 @@
         "./node_modules/@types/react/global.d.ts",
         "./node_modules/csstype/index.d.ts"
       ],
+      "./node_modules/socket.io-client/build/index.d.ts": [
+        "./node_modules/socket.io-client/build/manager.d.ts",
+        "./node_modules/socket.io-client/build/socket.d.ts",
+        "./node_modules/socket.io-parser/dist/index.d.ts"
+      ],
+      "./node_modules/socket.io-client/build/manager.d.ts": [
+        "./node_modules/socket.io-client/build/socket.d.ts",
+        "./node_modules/socket.io-client/build/typed-events.d.ts",
+        "./node_modules/socket.io-parser/dist/index.d.ts"
+      ],
+      "./node_modules/socket.io-client/build/socket.d.ts": [
+        "./node_modules/socket.io-client/build/manager.d.ts",
+        "./node_modules/socket.io-client/build/typed-events.d.ts",
+        "./node_modules/socket.io-parser/dist/index.d.ts"
+      ],
+      "./node_modules/socket.io-client/build/typed-events.d.ts": [
+        "./node_modules/@types/component-emitter/index.d.ts"
+      ],
+      "./node_modules/socket.io-parser/dist/index.d.ts": [
+        "./node_modules/@types/component-emitter/index.d.ts"
+      ],
+      "./sockets/index.ts": [
+        "./sockets/reachsocketcontext.tsx",
+        "./sockets/usesocketevent.ts",
+        "./sockets/usesocketfields.ts",
+        "./sockets/usesocketnamespace.ts"
+      ],
+      "./sockets/reachsocketcontext.tsx": [
+        "./node_modules/@types/react/index.d.ts",
+        "./sockets/socketconnection.ts"
+      ],
+      "./sockets/socketconnection.ts": [
+        "./node_modules/socket.io-client/build/index.d.ts",
+        "./node_modules/socket.io-client/build/typed-events.d.ts"
+      ],
+      "./sockets/usesocketevent.ts": [
+        "./node_modules/@types/react/index.d.ts",
+        "./sockets/socketconnection.ts"
+      ],
+      "./sockets/usesocketfields.ts": [
+        "./core/index.ts",
+        "./sockets/socketconnection.ts"
+      ],
+      "./sockets/usesocketnamespace.ts": [
+        "./sockets/socketconnection.ts"
+      ],
       "../reach/index.d.ts": [
         "../reach/core/index.ts",
         "../reach/types/index.ts"
@@ -386,12 +550,19 @@
       "./core/usesearch.ts",
       "./index.ts",
       "./node_modules/@types/color-name/index.d.ts",
+      "./node_modules/@types/component-emitter/index.d.ts",
       "./node_modules/@types/minimatch/index.d.ts",
       "./node_modules/@types/parse-json/index.d.ts",
       "./node_modules/@types/prop-types/index.d.ts",
       "./node_modules/@types/react/global.d.ts",
       "./node_modules/@types/react/index.d.ts",
+      "./node_modules/@types/uuid/index.d.ts",
       "./node_modules/csstype/index.d.ts",
+      "./node_modules/socket.io-client/build/index.d.ts",
+      "./node_modules/socket.io-client/build/manager.d.ts",
+      "./node_modules/socket.io-client/build/socket.d.ts",
+      "./node_modules/socket.io-client/build/typed-events.d.ts",
+      "./node_modules/socket.io-parser/dist/index.d.ts",
       "./node_modules/typescript/lib/lib.dom.d.ts",
       "./node_modules/typescript/lib/lib.es2015.collection.d.ts",
       "./node_modules/typescript/lib/lib.es2015.core.d.ts",
@@ -423,6 +594,12 @@
       "./node_modules/typescript/lib/lib.es2019.string.d.ts",
       "./node_modules/typescript/lib/lib.es2019.symbol.d.ts",
       "./node_modules/typescript/lib/lib.es5.d.ts",
+      "./sockets/index.ts",
+      "./sockets/reachsocketcontext.tsx",
+      "./sockets/socketconnection.ts",
+      "./sockets/usesocketevent.ts",
+      "./sockets/usesocketfields.ts",
+      "./sockets/usesocketnamespace.ts",
       "../reach/core/index.ts",
       "../reach/core/reach.ts",
       "../reach/core/reachbody.ts",

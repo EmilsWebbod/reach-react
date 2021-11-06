@@ -70,7 +70,10 @@ function useCrud(path, data, props) {
         });
     }, [props.disableAutoSave, patch]);
     const save = react_1.useCallback(() => patch(ref.current), [patch]);
-    return [state, set, save];
+    const setData = react_1.useCallback((data) => {
+        setState((s) => getNewState(Object.assign(Object.assign({}, s.data), data)));
+    }, []);
+    return [state, set, save, setData];
 }
 exports.useCrud = useCrud;
 function getPatchData(state) {

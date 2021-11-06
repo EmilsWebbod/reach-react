@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { IUseCrudProps, IUseCrudSaveFn, IUseCrudSetFn, IUseCrudState, useCrud } from './useCrud';
+import { IUseCrudProps, IUseCrudSaveFn, IUseCrudSetDataFn, IUseCrudSetFn, IUseCrudState, useCrud } from './useCrud';
 
 export type IUseFieldEdit<T extends object, P extends object> = {
   [K in keyof T]?: {
@@ -12,6 +12,7 @@ export interface IUseFieldState<T extends object, E> extends Omit<IUseCrudState<
 }
 
 export type IUseFieldValueRet<T extends object, K extends keyof T, P extends object> = {
+  defaultValue: T[K];
   value: T[K];
 } & P;
 
@@ -19,7 +20,8 @@ export type IUseFieldRet<T extends object, P extends object, E> = [
   IUseFieldState<T, E>,
   <K extends keyof T>(key: K) => IUseFieldValueRet<T, K, P>,
   IUseCrudSetFn<T>,
-  IUseCrudSaveFn
+  IUseCrudSaveFn,
+  IUseCrudSetDataFn<T>
 ];
 
 export function useFields<T extends object, P extends object, E = any>(
@@ -41,7 +43,7 @@ export function useFields<T extends object, P extends object, E = any>(
     return newData as T;
   }, [fields, data]);
 
-  const [state, set, save] = useCrud<T, E>(path, defaultData, {
+  const [state, set, save, setData] = useCrud<T, E>(path, defaultData, {
     disableAutoSave: false,
     ...props,
   });
@@ -51,11 +53,13 @@ export function useFields<T extends object, P extends object, E = any>(
       if (!fields[key]) {
         throw new Error(`useField was used with edit field that was not defined. Add ${key} to field object`);
       }
-      const { defaultValue, ...rest } = fields[key]!;
-      return { ...rest, value: state.data[key] } as IUseFieldValueRet<T, K, P>;
+      return { ...fields[key]!, value: state.data[key] } as IUseFieldValueRet<T, K, P>;
     },
     [state, fields]
   );
 
-  return [state as IUseFieldState<T, E>, getField, set, save];
+  return useMemo(
+    () => [state as IUseFieldState<T, E>, getField, set, save, setData],
+    [state, getField, set, save, setData]
+  );
 }

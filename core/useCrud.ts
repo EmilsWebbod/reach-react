@@ -24,7 +24,13 @@ export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
   key: K
 ) => (event: ChangeEvent<ValidEvents> | T[K]) => void;
 export type IUseCrudSaveFn = () => Promise<void>;
-export type IUseCrudRet<T extends object, E> = [IUseCrudState<T, E>, IUseCrudSetFn<T>, IUseCrudSaveFn];
+export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>) => void;
+export type IUseCrudRet<T extends object, E> = [
+  IUseCrudState<T, E>,
+  IUseCrudSetFn<T>,
+  IUseCrudSaveFn,
+  IUseCrudSetDataFn<T>
+];
 
 export function useCrud<T extends object, E = any>(
   path: string,
@@ -106,7 +112,11 @@ export function useCrud<T extends object, E = any>(
 
   const save = useCallback(() => patch(ref.current), [patch]);
 
-  return [state, set, save];
+  const setData = useCallback((data: Partial<T>) => {
+    setState((s) => getNewState({ ...s.data, ...data }));
+  }, []);
+
+  return [state, set, save, setData];
 }
 
 function getPatchData<T extends object, E>(state: IUseCrudState<T, E>) {

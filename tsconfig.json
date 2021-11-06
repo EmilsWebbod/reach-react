@@ -5,8 +5,9 @@
     "lib": ["dom","es2019"],
     "module": "commonjs",
     "declaration": true,
-    "strict": true
+    "strict": true,
+    "jsx": "react"
   },
-  "include": ["index.ts", "core"],
+  "include": ["index.ts", "core", "sockets"],
   "exclude": ["node_modules"]
 }
