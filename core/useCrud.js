@@ -72,7 +72,7 @@ function useCrud(path, data, props) {
             ref.current.busy = false;
         }
     }), [reach, props.idKey]);
-    const set = react_1.useCallback((key) => (event, disableAutoSave = props.disableAutoSave) => {
+    const set = react_1.useCallback((key, disableAutoSave = props.disableAutoSave) => (event) => {
         const value = event && typeof event === 'object' && 'target' in event ? event.target.value : event;
         setState((s) => {
             ref.current = Object.assign(Object.assign({}, s), { edited: Object.assign(Object.assign({}, s.edited), { [key]: s.initialData[key] !== value }), data: Object.assign(Object.assign({}, s.data), { [key]: value }) });

@@ -27,7 +27,8 @@ export interface IUseCrudActions {
 
 type ValidEvents = HTMLInputElement | HTMLTextAreaElement;
 export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
-  key: K
+  key: K,
+  disableAutosave?: boolean
 ) => (event: ChangeEvent<ValidEvents> | T[K]) => void;
 export type IUseCrudSaveFn = () => Promise<void>;
 export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>) => void;
@@ -112,8 +113,8 @@ export function useCrud<T extends object, E = any>(
   );
 
   const set = useCallback(
-    <K extends keyof T>(key: K) =>
-      (event: ChangeEvent<ValidEvents> | T[K], disableAutoSave = props.disableAutoSave) => {
+    <K extends keyof T>(key: K, disableAutoSave = props.disableAutoSave) =>
+      (event: ChangeEvent<ValidEvents> | T[K]) => {
         const value =
           event && typeof event === 'object' && 'target' in event ? (event.target.value as unknown as T[K]) : event;
         setState((s) => {

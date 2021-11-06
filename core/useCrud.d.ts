@@ -19,7 +19,7 @@ export interface IUseCrudActions {
     delete: () => void;
 }
 declare type ValidEvents = HTMLInputElement | HTMLTextAreaElement;
-export declare type IUseCrudSetFn<T extends object> = <K extends keyof T>(key: K) => (event: ChangeEvent<ValidEvents> | T[K]) => void;
+export declare type IUseCrudSetFn<T extends object> = <K extends keyof T>(key: K, disableAutosave?: boolean) => (event: ChangeEvent<ValidEvents> | T[K]) => void;
 export declare type IUseCrudSaveFn = () => Promise<void>;
 export declare type IUseCrudSetDataFn<T extends object> = (data: Partial<T>) => void;
 export declare type IUseCrudRet<T extends object, E> = [

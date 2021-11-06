@@ -10,6 +10,7 @@ function ReachNamespaceProvider({ children, namespace, broadcast, }) {
     React.useEffect(() => {
         const newSocket = addConnection(namespace);
         setSocket(newSocket);
+        return newSocket.subscribe(broadcast);
     }, [namespace, broadcast, addConnection, broadcast]);
     return React.createElement(exports.ReachNamespaceContext.Provider, { value: socket }, children);
 }

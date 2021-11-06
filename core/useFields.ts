@@ -1,35 +1,37 @@
 import { useCallback, useMemo } from 'react';
 import { IUseCrudProps, IUseCrudSaveFn, IUseCrudSetDataFn, IUseCrudSetFn, IUseCrudState, useCrud } from './useCrud';
 
-export type IUseFieldEdit<T extends object, P extends object> = {
-  [K in keyof T]?: {
-    defaultValue: T[K];
-  } & P;
+export type IUseFieldEdit<T extends object, P extends {}> = {
+  [K in keyof T]?: IUseFieldValueIn<T, K> & P;
 };
 
-export interface IUseFieldState<T extends object, E> extends Omit<IUseCrudState<T, E>, 'data'> {
+export interface IUseFieldState<T extends {}, E> extends Omit<IUseCrudState<T, E>, 'data'> {
   data: T;
 }
 
-export type IUseFieldValueRet<T extends object, K extends keyof T, P extends object> = {
+export type IUseFieldValueIn<T extends object, K extends keyof T> = {
   defaultValue: T[K];
+};
+export interface IUseFieldValueRet<T extends object, K extends keyof T> extends IUseFieldValueIn<T, K> {
+  id: string;
+  edited: boolean;
   value: T[K];
-} & P;
+}
 
-export type IUseFieldRet<T extends object, P extends object, E> = [
-  busy: IUseFieldState<T, E>,
-  getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T, K, P>,
-  setField: IUseCrudSetFn<T>,
-  save: IUseCrudSaveFn,
-  set: IUseCrudSetDataFn<T>
-];
+export type IUseFieldRet<T extends object, E, P extends {}> = {
+  state: IUseFieldState<T, E>;
+  getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T, K> & P;
+  setField: IUseCrudSetFn<T>;
+  save: IUseCrudSaveFn;
+  setData: IUseCrudSetDataFn<T>;
+};
 
-export function useFields<T extends object, P extends object, E = any>(
+export function useFields<T extends object, E, P extends {}>(
   path: string,
   data: Partial<T>,
   fields: IUseFieldEdit<T, P>,
   props: IUseCrudProps<T>
-): IUseFieldRet<T, P, E> {
+): IUseFieldRet<T, E, P> {
   const defaultData = useMemo(() => {
     const newData: Partial<T> = {};
     for (const key in data) {
@@ -43,7 +45,7 @@ export function useFields<T extends object, P extends object, E = any>(
     return newData as T;
   }, [fields, data]);
 
-  const [state, set, save, setData] = useCrud<T, E>(path, defaultData, {
+  const [state, setField, save, setData] = useCrud<T, E>(path, defaultData, {
     disableAutoSave: false,
     ...props,
   });
@@ -53,13 +55,15 @@ export function useFields<T extends object, P extends object, E = any>(
       if (!fields[key]) {
         throw new Error(`useField was used with edit field that was not defined. Add ${key} to field object`);
       }
-      return { ...fields[key]!, value: state.data[key] } as IUseFieldValueRet<T, K, P>;
+      const id = `${state.data[props.idKey]}-${key}`;
+      const edited = Boolean(state.edited[key]);
+      return { ...fields[key]!, id, edited, value: state.data[key] } as IUseFieldValueRet<T, K> & P;
     },
-    [state, fields]
+    [state, props.idKey, fields]
   );
 
   return useMemo(
-    () => [state as IUseFieldState<T, E>, getField, set, save, setData],
-    [state, getField, set, save, setData]
+    () => ({ state: state as IUseFieldState<T, E>, getField, setField, save, setData }),
+    [state, getField, setField, save, setData]
   );
 }

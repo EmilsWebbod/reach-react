@@ -1,21 +1,23 @@
 import { IUseCrudProps, IUseCrudSaveFn, IUseCrudSetDataFn, IUseCrudSetFn, IUseCrudState } from './useCrud';
-export declare type IUseFieldEdit<T extends object, P extends object> = {
-    [K in keyof T]?: {
-        defaultValue: T[K];
-    } & P;
+export declare type IUseFieldEdit<T extends object, P extends {}> = {
+    [K in keyof T]?: IUseFieldValueIn<T, K> & P;
 };
-export interface IUseFieldState<T extends object, E> extends Omit<IUseCrudState<T, E>, 'data'> {
+export interface IUseFieldState<T extends {}, E> extends Omit<IUseCrudState<T, E>, 'data'> {
     data: T;
 }
-export declare type IUseFieldValueRet<T extends object, K extends keyof T, P extends object> = {
+export declare type IUseFieldValueIn<T extends object, K extends keyof T> = {
     defaultValue: T[K];
+};
+export interface IUseFieldValueRet<T extends object, K extends keyof T> extends IUseFieldValueIn<T, K> {
+    id: string;
+    edited: boolean;
     value: T[K];
-} & P;
-export declare type IUseFieldRet<T extends object, P extends object, E> = [
-    busy: IUseFieldState<T, E>,
-    getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T, K, P>,
-    setField: IUseCrudSetFn<T>,
-    save: IUseCrudSaveFn,
-    set: IUseCrudSetDataFn<T>
-];
-export declare function useFields<T extends object, P extends object, E = any>(path: string, data: Partial<T>, fields: IUseFieldEdit<T, P>, props: IUseCrudProps<T>): IUseFieldRet<T, P, E>;
+}
+export declare type IUseFieldRet<T extends object, E, P extends {}> = {
+    state: IUseFieldState<T, E>;
+    getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T, K> & P;
+    setField: IUseCrudSetFn<T>;
+    save: IUseCrudSaveFn;
+    setData: IUseCrudSetDataFn<T>;
+};
+export declare function useFields<T extends object, E, P extends {}>(path: string, data: Partial<T>, fields: IUseFieldEdit<T, P>, props: IUseCrudProps<T>): IUseFieldRet<T, E, P>;

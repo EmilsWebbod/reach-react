@@ -41,6 +41,7 @@ class ReachSocketConnection {
         this.socketConnection.on('connect', () => { });
         this.socketConnection.once('connect', () => {
             this.socketConnection.onAny((event, ...broadcast) => {
+                console.log(event, ...broadcast);
                 this.subscriptions.forEach((x) => x.filter ? x.filter(event, ...broadcast) && x.callback(event, ...broadcast) : x.callback(event, ...broadcast));
             });
         });

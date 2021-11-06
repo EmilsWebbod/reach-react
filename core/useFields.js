@@ -16,13 +16,15 @@ function useFields(path, data, fields, props) {
         }
         return newData;
     }, [fields, data]);
-    const [state, set, save, setData] = useCrud_1.useCrud(path, defaultData, Object.assign({ disableAutoSave: false }, props));
+    const [state, setField, save, setData] = useCrud_1.useCrud(path, defaultData, Object.assign({ disableAutoSave: false }, props));
     const getField = react_1.useCallback((key) => {
         if (!fields[key]) {
             throw new Error(`useField was used with edit field that was not defined. Add ${key} to field object`);
         }
-        return Object.assign(Object.assign({}, fields[key]), { value: state.data[key] });
-    }, [state, fields]);
-    return react_1.useMemo(() => [state, getField, set, save, setData], [state, getField, set, save, setData]);
+        const id = `${state.data[props.idKey]}-${key}`;
+        const edited = Boolean(state.edited[key]);
+        return Object.assign(Object.assign({}, fields[key]), { id, edited, value: state.data[key] });
+    }, [state, props.idKey, fields]);
+    return react_1.useMemo(() => ({ state: state, getField, setField, save, setData }), [state, getField, setField, save, setData]);
 }
 exports.useFields = useFields;

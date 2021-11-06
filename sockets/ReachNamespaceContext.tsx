@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { ReachSocketConnection } from './SocketConnection';
+import { ReachSocketConnection, SocketConnectionBroadcastFn } from './SocketConnection';
 import { ReachSocketContext } from './ReachSocketContext';
 
 export const ReachNamespaceContext = React.createContext<ReachSocketConnection<any> | null>(null);
 
 export interface IReachNamespaceProviderProps<T extends any[]> extends JSX.ElementChildrenAttribute {
   namespace: string;
-  broadcast: (event: string, ...data: T) => void;
+  broadcast: SocketConnectionBroadcastFn<T>;
 }
 
 export function ReachNamespaceProvider<T extends any[]>({
@@ -20,6 +20,7 @@ export function ReachNamespaceProvider<T extends any[]>({
   React.useEffect(() => {
     const newSocket = addConnection(namespace);
     setSocket(newSocket);
+    return newSocket.subscribe<T>(broadcast);
   }, [namespace, broadcast, addConnection, broadcast]);
 
   return <ReachNamespaceContext.Provider value={socket}>{children}</ReachNamespaceContext.Provider>;
