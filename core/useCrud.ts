@@ -9,7 +9,7 @@ export interface IUseCrudProps<T extends object> {
 }
 
 export interface IUseCrudState<T, E> {
-  endpoint: string;
+  path: string;
   busy: boolean;
   data: Partial<T>;
   initialData: Partial<T>;
@@ -50,10 +50,7 @@ export function useCrud<T extends object, E = any>(
   const reach = useMemo(() => new Reach(service), [service]);
   const init = useRef(false);
   const initialData = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
-  const defaultState = useMemo(
-    () => getNewState(`${path}/${initialData[props.idKey] || ''}`, initialData),
-    [path, props.idKey, initialData]
-  );
+  const defaultState = useMemo(() => getNewState(path, initialData), [path, props.idKey, initialData]);
   const ref = useRef<IUseCrudState<T, E>>(defaultState);
   const queue = useRef<IUseCrudState<T, E>[]>([]);
   const [state, setState] = useState<IUseCrudState<T, E>>(defaultState);
@@ -94,7 +91,7 @@ export function useCrud<T extends object, E = any>(
         let data;
         if (id) {
           const body = getPatchData(state);
-          data = await reach.api(endpoint, { method: 'PATCH', body });
+          data = await reach.api(`${path}/${id}`, { method: 'PATCH', body });
         } else {
           data = await reach.api(path, { method: 'POST', body: ref.current.data });
         }
@@ -105,7 +102,7 @@ export function useCrud<T extends object, E = any>(
           ref.current.busy = false;
           await patch(patchState);
         } else {
-          ref.current = getNewState(endpoint, data);
+          ref.current = getNewState(path, data);
           setState(ref.current);
         }
       } catch (error) {
@@ -113,7 +110,7 @@ export function useCrud<T extends object, E = any>(
         ref.current.busy = false;
       }
     },
-    [reach, endpoint, props.idKey]
+    [reach, path, props.idKey]
   );
 
   const set = useCallback(
@@ -140,12 +137,9 @@ export function useCrud<T extends object, E = any>(
 
   const save = useCallback(() => patch(ref.current), [patch]);
 
-  const setData = useCallback(
-    (data: Partial<T>) => {
-      setState((s) => getNewState(endpoint, { ...s.data, ...data }, s.edited));
-    },
-    [endpoint]
-  );
+  const setData = useCallback((data: Partial<T>) => {
+    setState((s) => getNewState(s.path, { ...s.data, ...data }, s.edited));
+  }, []);
 
   const actions = useMemo(() => ({ read: fetch('GET'), delete: fetch('DELETE') }), [fetch]);
 
@@ -169,9 +163,9 @@ function getPatchData<T extends object, E>(state: IUseCrudState<T, E>) {
   return patchData;
 }
 
-function getNewState<T>(endpoint: string, data: Partial<T>, edited: Edited<T> = {}) {
+function getNewState<T>(path: string, data: Partial<T>, edited: Edited<T> = {}) {
   return {
-    endpoint,
+    path,
     busy: false,
     data,
     initialData: data,

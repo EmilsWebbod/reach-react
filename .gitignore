@@ -11,5 +11,8 @@ src/
 .nyc_output
 .env
 
+*.js
+*d.ts
+
 yarn-error.log
 tsconfig.tsbuildinfo
