@@ -25,10 +25,10 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@ewb/reach@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@ewb/reach/-/reach-0.0.1.tgz#f194b61f2183acd0689148270294631dd2b51349"
-  integrity sha512-ussAaBsSrjJIAQfLJLcwqGZJV6Sev7FxFh0J9DO6iFm21NpUDcaGzVzTmVi90jMoBb+qcWEc/eCtap+A9x6xjQ==
+"@ewb/reach@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@ewb/reach/-/reach-0.1.0.tgz#86e004e3ab5073b4f03e70b06319cbea1131518c"
+  integrity sha512-E6RFtJa+i1diL+Bfycm09sOUl/XTxtGUfqLE5aaHqVEDQ4Mb9Q54Ir9IZuElPpUfuMHXbbWt3S9F5N/soIwkoA==
 
 "@socket.io/component-emitter@~3.0.0":
   version "3.0.0"
