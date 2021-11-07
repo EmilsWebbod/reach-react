@@ -31,12 +31,12 @@ export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
   key: K,
   disableAutosave?: boolean
 ) => (event: ChangeEvent<ValidEvents> | T[K]) => void;
-export type IUseCrudSaveFn = () => Promise<void>;
+export type IUseCrudSaveFn<T> = () => Promise<T | null>;
 export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>) => void;
 export type IUseCrudRet<T extends object, E> = [
   state: IUseCrudState<T, E>,
   setField: IUseCrudSetFn<T>,
-  save: IUseCrudSaveFn,
+  save: IUseCrudSaveFn<T>,
   set: IUseCrudSetDataFn<T>,
   actions: IUseCrudActions
 ];
@@ -71,15 +71,15 @@ export function useCrud<T extends object, E = any>(
   );
 
   const patch = useCallback(
-    async (state: IUseCrudState<T, E>) => {
+    async (state: IUseCrudState<T, E>): Promise<T | null> => {
       try {
         if (!Object.values(state.edited).some(Boolean)) {
-          return;
+          return null;
         }
 
         if (ref.current.busy) {
           queue.current.push({ ...state });
-          return;
+          return null;
         }
 
         if (!ref.current.busy) {
@@ -88,12 +88,12 @@ export function useCrud<T extends object, E = any>(
         }
 
         const id = state.data[props.idKey];
-        let data;
+        let data: T;
         if (id) {
           const body = getPatchData(state);
-          data = await reach.api(`${path}/${id}`, { method: 'PATCH', body });
+          data = await reach.api<T>(`${path}/${id}`, { method: 'PATCH', body });
         } else {
-          data = await reach.api(path, { method: 'POST', body: ref.current.data });
+          data = await reach.api<T>(path, { method: 'POST', body: ref.current.data });
         }
 
         if (queue.current.length > 0) {
@@ -105,9 +105,11 @@ export function useCrud<T extends object, E = any>(
           ref.current = getNewState(path, data);
           setState(ref.current);
         }
+        return data as T;
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
         ref.current.busy = false;
+        return null;
       }
     },
     [reach, path, props.idKey]

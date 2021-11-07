@@ -22,7 +22,7 @@ export type IUseFieldRet<T extends object, E, P extends {}> = {
   state: IUseFieldState<T, E> & { fields: IUseFieldEdit<T, P>; idKey: keyof T };
   getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T[K]> & P;
   setField: IUseCrudSetFn<T>;
-  save: IUseCrudSaveFn;
+  save: IUseCrudSaveFn<T>;
   setData: IUseCrudSetDataFn<T>;
 };
 
