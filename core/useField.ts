@@ -27,7 +27,7 @@ export function useField<T extends object, K extends keyof T & string, E, P>(
   props: IUseFieldProps = {}
 ): IUserFieldRet<T[K], E, P> {
   const { path, data, fields, idKey } = crud.state;
-  const value = useMemo(() => getValue(data, key.split('.') as (keyof T)[]) as T[K], [data, key]);
+  const value = useMemo(() => getDotValue(data, key.split('.') as (keyof T)[]) as T[K], [data, key]);
   const ref = useRef(value);
   const service = useContext(ReachContext);
   const reach = useMemo(() => new Reach(service), [service]);
@@ -80,10 +80,10 @@ export function useField<T extends object, K extends keyof T & string, E, P>(
   return [state.busy, field, state.error, setValue];
 }
 
-function getValue<T, K extends keyof T, V extends any>(data: T, arr: K[]): V {
+function getDotValue<T, K extends keyof T, V extends any>(data: T, arr: K[]): V {
   const key = arr[0];
   if (key && data[key]) {
-    if (typeof data[key] === 'object') return getValue(data[key], arr.slice(1) as any) as V;
+    if (typeof data[key] === 'object') return getDotValue(data[key], arr.slice(1) as any) as V;
   }
   return data[key] as V;
 }

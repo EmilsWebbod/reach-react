@@ -18,20 +18,20 @@ export interface IUseFieldValueRet<V> extends IUseFieldValueIn<V> {
   value: V;
 }
 
-export type IUseFieldRet<T extends object, E, P extends {}> = {
+export type IUseFieldRet<T extends object, E, P extends {}, RET = T> = {
   state: IUseFieldState<T, E> & { fields: IUseFieldEdit<T, P>; idKey: keyof T };
   getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T[K]> & P;
   setField: IUseCrudSetFn<T>;
-  save: IUseCrudSaveFn<T>;
+  save: IUseCrudSaveFn<RET>;
   setData: IUseCrudSetDataFn<T>;
 };
 
-export function useFields<T extends object, E, P extends {}>(
+export function useFields<T extends object, E, P extends {}, RET = T>(
   path: string,
   data: Partial<T>,
   fields: IUseFieldEdit<T, P>,
   props: IUseCrudProps<T>
-): IUseFieldRet<T, E, P> {
+): IUseFieldRet<T, E, P, RET> {
   const idKey = props.idKey;
   const defaultData = useMemo(() => {
     const newData: Partial<T> = {};
@@ -46,7 +46,7 @@ export function useFields<T extends object, E, P extends {}>(
     return newData as T;
   }, [fields, data]);
 
-  const [state, setField, save, setData] = useCrud<T, E>(path, defaultData, {
+  const [state, setField, save, setData] = useCrud<T, E, RET>(path, defaultData, {
     disableAutoSave: false,
     ...props,
   });

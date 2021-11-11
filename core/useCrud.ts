@@ -1,11 +1,13 @@
 import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Reach } from '@ewb/reach';
+import { IReachOptions, Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
 
-export interface IUseCrudProps<T extends object> {
+export interface IUseCrudProps<T extends object, RET = T> {
   idKey: keyof T;
   disableAutoSave?: boolean;
   initWithGet?: boolean;
+  reachOptions?: Omit<IReachOptions, 'method' | 'data'>;
+  dontSetStateOnPost?: boolean;
 }
 
 export interface IUseCrudState<T, E> {
@@ -33,19 +35,19 @@ export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
 ) => (event: ChangeEvent<ValidEvents> | T[K]) => void;
 export type IUseCrudSaveFn<T> = () => Promise<T | null>;
 export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>) => void;
-export type IUseCrudRet<T extends object, E> = [
+export type IUseCrudRet<T extends object, E, RET = T> = [
   state: IUseCrudState<T, E>,
   setField: IUseCrudSetFn<T>,
-  save: IUseCrudSaveFn<T>,
+  save: IUseCrudSaveFn<RET>,
   set: IUseCrudSetDataFn<T>,
   actions: IUseCrudActions
 ];
 
-export function useCrud<T extends object, E = any>(
+export function useCrud<T extends object, E = any, RET = T>(
   path: string,
   data: Partial<T>,
   props: IUseCrudProps<T>
-): IUseCrudRet<T, E> {
+): IUseCrudRet<T, E, RET> {
   const service = useContext(ReachContext);
   const reach = useMemo(() => new Reach(service), [service]);
   const init = useRef(false);
@@ -56,6 +58,7 @@ export function useCrud<T extends object, E = any>(
   const [state, setState] = useState<IUseCrudState<T, E>>(defaultState);
   const id = useMemo(() => state.data[props.idKey], [state.data, props.idKey]);
   const endpoint = useMemo(() => `${path}/${id}`, [path, id]);
+  const opts = useMemo(() => props.reachOptions || {}, [props.reachOptions]);
 
   const fetch = useCallback(
     (method: 'GET' | 'DELETE') => async () => {
@@ -71,7 +74,7 @@ export function useCrud<T extends object, E = any>(
   );
 
   const patch = useCallback(
-    async (state: IUseCrudState<T, E>): Promise<T | null> => {
+    async (state: IUseCrudState<T, E>): Promise<RET | null> => {
       try {
         if (!Object.values(state.edited).some(Boolean)) {
           return null;
@@ -88,12 +91,12 @@ export function useCrud<T extends object, E = any>(
         }
 
         const id = state.data[props.idKey];
-        let data: T;
+        let data: RET;
         if (id) {
           const body = getPatchData(state);
-          data = await reach.api<T>(`${path}/${id}`, { method: 'PATCH', body });
+          data = await reach.api<RET>(`${path}/${id}`, { ...opts, method: 'PATCH', body });
         } else {
-          data = await reach.api<T>(path, { method: 'POST', body: ref.current.data });
+          data = await reach.api<RET>(path, { ...opts, method: 'POST', body: ref.current.data });
         }
 
         if (queue.current.length > 0) {
@@ -101,18 +104,18 @@ export function useCrud<T extends object, E = any>(
           queue.current.splice(0, 1);
           ref.current.busy = false;
           await patch(patchState);
-        } else {
+        } else if (!props.dontSetStateOnPost) {
           ref.current = getNewState(path, data);
           setState(ref.current);
         }
-        return data as T;
+        return data as RET;
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
         ref.current.busy = false;
         return null;
       }
     },
-    [reach, path, props.idKey]
+    [reach, path, props.idKey, opts, props.dontSetStateOnPost]
   );
 
   const set = useCallback(
