@@ -1,5 +1,6 @@
 import { io, Socket, ManagerOptions, SocketOptions } from 'socket.io-client';
 import { v4 } from 'uuid';
+import { ReachService } from '../../reach';
 
 export type SocketConnectionBroadcastFn<T extends any[]> = (...broadcast: T) => void;
 export type SocketConnectionFilterFn<T extends any[]> = (...data: T) => boolean;
@@ -20,6 +21,7 @@ export class ReachSocketConnection<T> {
   private reconnect = 5000;
 
   constructor(
+    private service: ReachService,
     public url: string,
     public namespace: string = '',
     public event: string = '',
@@ -52,7 +54,12 @@ export class ReachSocketConnection<T> {
   }
 
   public on(event: string, fn: (...args: any[]) => void) {
-    return this.socketConnection.on(event, fn);
+    return this.socketConnection.on(event, (id, ...args) => {
+      if (typeof id === 'string' && id === this.socketConnection.id) {
+        return;
+      }
+      fn(id, ...args);
+    });
   }
 
   public disconnect() {
@@ -63,14 +70,22 @@ export class ReachSocketConnection<T> {
   }
 
   private init() {
-    this.socketConnection.on('connect', () => {});
+    this.socketConnection.on('connect', () => {
+      this.service.addSocket(this.socketConnection.id);
+    });
     this.socketConnection.once('connect', () => {
-      this.socketConnection.onAny((event, ...broadcast: T[]) => {
-        console.log(event, ...broadcast);
+      this.socketConnection.onAny((id, ...broadcast: T[]) => {
+        if (typeof id === 'string' && id === this.socketConnection.id) {
+          return;
+        }
         this.subscriptions.forEach((x) =>
-          x.filter ? x.filter(event, ...broadcast) && x.callback(event, ...broadcast) : x.callback(event, ...broadcast)
+          x.filter ? x.filter(id, ...broadcast) && x.callback(id, ...broadcast) : x.callback(id, ...broadcast)
         );
       });
+    });
+
+    this.socketConnection.on('disconnect', () => {
+      this.service.deleteSocket(this.socketConnection.id);
     });
 
     this.socketConnection.on('error', (e: any) => {

@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { IUseCrudProps, IUseCrudSaveFn, IUseCrudSetDataFn, IUseCrudSetFn, IUseCrudState, useCrud } from './useCrud';
 
-export type IUseFieldEdit<T extends object, P extends {}> = {
+export type IUseFieldSchema<T extends object, P extends {}> = {
   [K in keyof T]?: IUseFieldValueIn<T[K]> & P;
 };
 
@@ -19,7 +19,7 @@ export interface IUseFieldValueRet<V> extends IUseFieldValueIn<V> {
 }
 
 export type IUseFieldRet<T extends object, E, P extends {}, RET = T> = {
-  state: IUseFieldState<T, E> & { fields: IUseFieldEdit<T, P>; idKey: keyof T };
+  state: IUseFieldState<T, E> & { schema: IUseFieldSchema<T, P>; idKey: keyof T };
   getField: <K extends keyof T>(key: K) => IUseFieldValueRet<T[K]> & P;
   setField: IUseCrudSetFn<T>;
   save: IUseCrudSaveFn<RET>;
@@ -29,7 +29,7 @@ export type IUseFieldRet<T extends object, E, P extends {}, RET = T> = {
 export function useFields<T extends object, E, P extends {}, RET = T>(
   path: string,
   data: Partial<T>,
-  fields: IUseFieldEdit<T, P>,
+  schema: IUseFieldSchema<T, P>,
   props: IUseCrudProps<T>
 ): IUseFieldRet<T, E, P, RET> {
   const idKey = props.idKey;
@@ -38,13 +38,13 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
     for (const key in data) {
       newData[key] = data[key];
     }
-    for (const key in fields) {
-      if (!newData[key] && fields[key]) {
-        newData[key] = fields[key]!.defaultValue;
+    for (const key in schema) {
+      if (!newData[key] && schema[key]) {
+        newData[key] = schema[key]!.defaultValue;
       }
     }
     return newData as T;
-  }, [fields, data]);
+  }, [schema, data]);
 
   const [state, setField, save, setData] = useCrud<T, E, RET>(path, defaultData, {
     disableAutoSave: false,
@@ -53,18 +53,18 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
 
   const getField = useCallback(
     <K extends keyof T>(key: K) => {
-      if (!fields[key]) {
+      if (!schema[key]) {
         throw new Error(`useField was used with edit field that was not defined. Add ${key} to field object`);
       }
       const id = `${state.data[idKey]}-${key}`;
       const edited = Boolean(state.edited[key]);
-      return { ...fields[key]!, id, edited, value: state.data[key] } as IUseFieldValueRet<T[K]> & P;
+      return { ...schema[key]!, id, edited, value: state.data[key] } as IUseFieldValueRet<T[K]> & P;
     },
-    [state, idKey, fields]
+    [state, idKey, schema]
   );
 
   return useMemo(
-    () => ({ state: { ...(state as IUseFieldState<T, E>), fields, idKey }, getField, setField, save, setData }),
-    [state, fields, idKey, getField, setField, save, setData]
+    () => ({ state: { ...(state as IUseFieldState<T, E>), schema, idKey }, getField, setField, save, setData }),
+    [state, schema, idKey, getField, setField, save, setData]
   );
 }

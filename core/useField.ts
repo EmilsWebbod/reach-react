@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
-import { IUseFieldEdit, IUseFieldRet, IUseFieldValueRet } from './useFields';
+import { IUseFieldSchema, IUseFieldRet, IUseFieldValueRet } from './useFields';
 import { IUseCrudRet } from './useCrud';
 
 interface State<V, E> {
@@ -26,7 +26,7 @@ export function useField<T extends object, K extends keyof T & string, E, P>(
   key: K,
   props: IUseFieldProps = {}
 ): IUserFieldRet<T[K], E, P> {
-  const { path, data, fields, idKey } = crud.state;
+  const { path, data, schema, idKey } = crud.state;
   const value = useMemo(() => getDotValue(data, key.split('.') as (keyof T)[]) as T[K], [data, key]);
   const ref = useRef(value);
   const service = useContext(ReachContext);
@@ -36,13 +36,13 @@ export function useField<T extends object, K extends keyof T & string, E, P>(
     busy: false,
   });
   const field = useMemo(() => {
-    if (!fields[key as keyof T]) {
+    if (!schema[key as keyof T]) {
       throw new Error(`useField was used with edit field that was not defined. Add ${key} to field object`);
     }
     const id = `${data[idKey]}-${key}`;
     const edited = ref.current !== state.value;
     // @ts-ignore
-    return { ...fields[key]!, id, edited, value: state.value };
+    return { ...schema[key]!, id, edited, value: state.value };
   }, [state.value, idKey]);
 
   const _id = data[idKey];

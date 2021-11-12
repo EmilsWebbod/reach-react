@@ -18,10 +18,10 @@ interface ContextProps {
 const defaultState: ContextProps = {
   connections: { current: [] },
   addConnection: () => {
-    return new ReachSocketConnection('', '');
+    return new ReachSocketConnection(null as any, '', '');
   },
   removeConnection: () => {
-    return new ReachSocketConnection('', '');
+    return new ReachSocketConnection(null as any, '', '');
   },
 };
 
@@ -45,11 +45,11 @@ export function ReachSocketProvider<T>({
     for (const connection of defaultConnections) {
       if (!connections.current.some((x) => x.namespace !== connection.namespace)) {
         connections.current.push(
-          new ReachSocketConnection<any>(url, connection.namespace, connection.event, socketOpts)
+          new ReachSocketConnection<any>(service, url, connection.namespace, connection.event, socketOpts)
         );
       }
     }
-  }, [url, defaultConnections, socketOpts]);
+  }, [service, url, defaultConnections, socketOpts]);
 
   const addConnection = useCallback(
     (namespace: string = '', event: string = '', opts: SocketConnectionOpts = socketOpts) => {
@@ -57,13 +57,13 @@ export function ReachSocketProvider<T>({
 
       if (!connection) {
         console.log('new connection', namespace, event);
-        connection = new ReachSocketConnection<T>(url, namespace, event, opts);
+        connection = new ReachSocketConnection<T>(service, url, namespace, event, opts);
         connections.current.push(connection);
       }
 
       return connection;
     },
-    [connections, url, socketOpts]
+    [service, connections, url, socketOpts]
   );
 
   const removeConnection = useCallback(

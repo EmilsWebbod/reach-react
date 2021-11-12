@@ -1,8 +1,8 @@
-import { IUseCrudProps, IUseFieldEdit, IUseFieldRet, IUseFieldValueIn, IUseFieldValueRet, useFields } from '../core';
+import { IUseCrudProps, IUseFieldSchema, IUseFieldRet, useFields } from '../core';
 import { IUseSocketProps, userSocketPropsToParams, useSocketNamespace } from './useSocketNamespace';
 
 export interface IUseSocketFieldssProps<T extends object, P extends object> {
-  fields: IUseFieldEdit<T, P>;
+  schema: IUseFieldSchema<T, P>;
   props: IUseCrudProps<T>;
 }
 
@@ -12,7 +12,7 @@ export function useSocketFields<T extends object, E, P extends {}, B extends any
   fields: IUseSocketFieldssProps<T, P>,
   socketProps: IUseSocketProps<T, B>
 ): IUseFieldRet<T, E, P> {
-  const field = useFields<T, E, P>(path, data, fields.fields, fields.props);
+  const field = useFields<T, E, P>(path, data, fields.schema, fields.props);
 
   useSocketNamespace(
     ...userSocketPropsToParams<T, B>(socketProps, field.state.data),
