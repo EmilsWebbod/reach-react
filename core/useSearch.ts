@@ -6,47 +6,49 @@ import { ReachContext } from './ReachContext';
 export interface IUseSearchProps<T, RES> {
   limit?: number;
   query?: IReachOptions['query'];
-  responseToData?: (body: RES) => Pick<IUseReachState<T, any>, 'count' | 'items'>;
+  responseToData?: (body: RES, state: IUseSearchState<T, any>) => Partial<IUseSearchState<T, any>>;
   reachOptions?: Omit<IReachOptions, 'query'>;
   disableInit?: boolean;
 }
 
-interface IUseReachState<T, E> extends IUseReachInfo {
+interface IUseSearchState<T, E> extends IUseSearchInfo {
   busy: boolean;
   items: T[];
   searchQuery: IReachQuery;
   error?: E;
 }
 
-export interface IUseReachInfo {
+export interface IUseSearchInfo {
   count: number;
   limit: number;
   skip: number;
 }
 
-export interface IUseReachActions<T> {
+export interface IUseSearchActions<T> {
   unshift: (...items: T[]) => void;
   splice: (start: number, deleteCount?: number, ...items: T[]) => void;
   push: (...items: T[]) => void;
   map: (fn: (item: T) => T) => void;
   filter: (fn: (item: T) => boolean) => void;
-  search: (fetchQuery: IReachQuery) => void;
+  search: (fetchQuery: IReachQuery) => Promise<T[]>;
 }
+
+export type IUseSearchNextFn<T> = () => Promise<T[] | null>;
 
 export type IUseSearchRet<T, E> = [
   busy: boolean,
   data: T[],
   error: E | undefined,
-  next: () => void,
-  info: IUseReachInfo,
-  actions: IUseReachActions<T>
+  next: IUseSearchNextFn<T>,
+  info: IUseSearchInfo,
+  actions: IUseSearchActions<T>
 ];
 
 export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearchProps<T, RES>): IUseSearchRet<T, E> {
   const { limit = 10, responseToData, reachOptions } = props;
   const init = React.useRef(false);
   const service = React.useContext(ReachContext);
-  const [state, setState] = React.useState<IUseReachState<T, E>>({
+  const [state, setState] = React.useState<IUseSearchState<T, E>>({
     busy: true,
     limit: limit || 10,
     skip: 0,
@@ -66,7 +68,7 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
   );
 
   const search = React.useCallback(
-    async (skip: number, searchQuery: IReachQuery = {}) => {
+    async (skip: number, searchQuery: IReachQuery = {}): Promise<T[]> => {
       try {
         let data = await reach.api<RES | T[]>(path, {
           ...reachOptions,
@@ -74,29 +76,43 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
         });
         const newState = { skip, searchQuery, busy: false };
         if (typeof responseToData === 'function') {
-          const { count, items } = responseToData(data as RES);
-          setState((s) => ({ ...s, ...newState, count, items: skip ? [...s.items, ...items] : items }));
-          return;
+          let retItems: T[] = [];
+          setState((s) => {
+            const { items, ...responseState } = responseToData(data as RES, s);
+            if (items) {
+              retItems = items;
+            }
+            return {
+              ...s,
+              ...responseState,
+              items: items ? (skip ? [...s.items, ...items] : items) : s.items,
+              busy: false,
+            };
+          });
+          return retItems;
         }
         if (!Array.isArray(data)) {
           throw new Error('useSearch error. data response is not typeof array. Use responseToData to parse response');
         }
         setState((s) => ({ ...s, ...newState, items: skip ? [...s.items, ...(data as T[])] : (data as T[]) }));
+        return data as T[];
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
+        return [] as T[];
       }
     },
     [path, query, responseToData, reachOptions]
   );
 
-  const next = useCallback(async () => {
+  const next: IUseSearchNextFn<T> = useCallback(async () => {
     if (state.items.length < state.count) {
       setState((s) => ({ ...s, busy: true }));
-      await search(state.skip + state.limit);
+      return search(state.skip + state.limit);
     }
+    return null;
   }, [state.items.length, state.count, search, state.skip, state.limit]);
 
-  const info = React.useMemo(
+  const info: IUseSearchInfo = React.useMemo(
     () => ({
       limit: state.limit,
       skip: state.skip,
@@ -105,15 +121,16 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
     [state.limit, state.skip, state.count]
   );
 
-  const actions = React.useMemo(
+  const actions: IUseSearchActions<T> = React.useMemo(
     () => ({
       unshift: (...items: T[]) => {
         setState((s) => ({ ...s, items: [...items, ...s.items], count: s.count + items.length }));
       },
       splice: (start: number, deleteCount: number = 1, ...items: T[]) => {
         setState((s) => {
-          s.items.splice(start, deleteCount, ...items);
-          return { ...s, items: [...s.items], count: s.count - deleteCount + items.length };
+          const newItems = [...s.items];
+          newItems.splice(start, deleteCount, ...items);
+          return { ...s, items: newItems, count: s.count - deleteCount + items.length };
         });
       },
       push: (...items: T[]) => {

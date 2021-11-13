@@ -30,9 +30,7 @@ export function useSocketSearch<T extends object, E, RES, B extends any[]>(
         if (action === 'POST') {
           return actions.unshift(item);
         }
-        console.log(idKey, _id, items);
         const index = items.findIndex((x) => String(x[idKey]) === _id);
-        console.log(action, index, item);
         if (index === -1) return;
 
         if (action === 'DELETE') {
