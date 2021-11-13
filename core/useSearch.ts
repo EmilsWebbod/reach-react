@@ -28,6 +28,8 @@ export interface IUseReachActions<T> {
   unshift: (...items: T[]) => void;
   splice: (start: number, deleteCount?: number, ...items: T[]) => void;
   push: (...items: T[]) => void;
+  map: (fn: (item: T) => T) => void;
+  filter: (fn: (item: T) => boolean) => void;
   search: (fetchQuery: IReachQuery) => void;
 }
 
@@ -120,6 +122,8 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
         });
       },
       search: (query: IReachQuery) => search(0, query),
+      map: (fn: (items: T) => T) => setState((s) => ({ ...s, items: s.items.map(fn) })),
+      filter: (fn: (item: T) => boolean) => setState((s) => ({ ...s, items: s.items.filter(fn) })),
     }),
     [search]
   );
