@@ -8,6 +8,8 @@ export interface IUseCrudProps<T extends object, RET = T> {
   initWithGet?: boolean;
   reachOptions?: Omit<IReachOptions, 'method' | 'data'>;
   dontSetStateOnPost?: boolean;
+  alwaysPatch?: boolean;
+  forcePatch?: (keyof T)[];
 }
 
 export interface IUseCrudState<T, E> {
@@ -92,9 +94,9 @@ export function useCrud<T extends object, E = any, RET = T>(
 
         const id = state.data[props.idKey];
         let data: RET;
-        if (id) {
-          const body = getPatchData(state);
-          data = await reach.api<RET>(`${path}/${id}`, { ...opts, method: 'PATCH', body });
+        if (id || props.alwaysPatch) {
+          const body = getPatchData(state, props.forcePatch);
+          data = await reach.api<RET>(`${path}/${id || ''}`, { ...opts, method: 'PATCH', body });
         } else {
           data = await reach.api<RET>(path, { ...opts, method: 'POST', body: ref.current.data });
         }
@@ -115,7 +117,7 @@ export function useCrud<T extends object, E = any, RET = T>(
         return null;
       }
     },
-    [reach, path, props.idKey, opts, props.dontSetStateOnPost]
+    [reach, path, props.idKey, opts, props.dontSetStateOnPost, props.alwaysPatch, props.forcePatch]
   );
 
   const set = useCallback(
@@ -158,10 +160,15 @@ export function useCrud<T extends object, E = any, RET = T>(
   return [state, set, save, setData, actions];
 }
 
-function getPatchData<T extends object, E>(state: IUseCrudState<T, E>) {
+function getPatchData<T extends object, E>(state: IUseCrudState<T, E>, forcePatch?: (keyof T)[]) {
   const patchData: Partial<T> = {};
   for (const key in state.edited) {
     if (state.edited[key]) {
+      patchData[key] = state.data[key];
+    }
+  }
+  if (forcePatch) {
+    for (const key of forcePatch) {
       patchData[key] = state.data[key];
     }
   }
