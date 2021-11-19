@@ -1,5 +1,13 @@
 import { useCallback, useMemo } from 'react';
-import { IUseCrudProps, IUseCrudSaveFn, IUseCrudSetDataFn, IUseCrudSetFn, IUseCrudState, useCrud } from './useCrud';
+import {
+  IUseCrudActions,
+  IUseCrudProps,
+  IUseCrudSaveFn,
+  IUseCrudSetDataFn,
+  IUseCrudSetFn,
+  IUseCrudState,
+  useCrud,
+} from './useCrud';
 
 export type IUseFieldSchema<T extends object, P extends {}> = {
   [K in keyof T]?: IUseFieldValueIn<T[K]> & P;
@@ -24,6 +32,7 @@ export type IUseFieldRet<T extends object, E, P extends {}, RET = T> = {
   setField: IUseCrudSetFn<T>;
   save: IUseCrudSaveFn<RET>;
   setData: IUseCrudSetDataFn<T>;
+  actions: IUseCrudActions;
 };
 
 export function useFields<T extends object, E, P extends {}, RET = T>(
@@ -46,7 +55,7 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
     return newData as T;
   }, [schema, data]);
 
-  const [state, setField, save, setData] = useCrud<T, E, RET>(path, defaultData, {
+  const [state, setField, save, setData, actions] = useCrud<T, E, RET>(path, defaultData, {
     disableAutoSave: false,
     ...props,
   });
@@ -64,7 +73,14 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
   );
 
   return useMemo(
-    () => ({ state: { ...(state as IUseFieldState<T, E>), schema, idKey }, getField, setField, save, setData }),
-    [state, schema, idKey, getField, setField, save, setData]
+    () => ({
+      state: { ...(state as IUseFieldState<T, E>), schema, idKey },
+      getField,
+      setField,
+      save,
+      setData,
+      actions,
+    }),
+    [state, schema, idKey, getField, setField, save, setData, actions]
   );
 }

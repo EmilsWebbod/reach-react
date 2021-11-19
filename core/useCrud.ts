@@ -26,8 +26,8 @@ type Edited<T> = {
 };
 
 export interface IUseCrudActions {
-  read: () => void;
-  delete: () => void;
+  read: () => Promise<void>;
+  delete: () => Promise<void>;
 }
 
 type ValidEvents = HTMLInputElement | HTMLTextAreaElement;
@@ -65,20 +65,21 @@ export function useCrud<T extends object, E = any, RET = T>(
   const fetch = useCallback(
     (method: 'GET' | 'DELETE') => async () => {
       try {
-        const data = await reach.api<T>(endpoint, { method });
+        const data = await reach.api<T>(endpoint, { ...opts, method });
         ref.current = getNewState(endpoint, data);
         setState(ref.current);
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
       }
     },
-    [reach, endpoint]
+    [reach, endpoint, opts]
   );
 
   const patch = useCallback(
     async (state: IUseCrudState<T, E>): Promise<RET | null> => {
       try {
-        if (!Object.values(state.edited).some(Boolean)) {
+        const id = state.data[props.idKey];
+        if (id && !Object.values(state.edited).some(Boolean)) {
           return null;
         }
 
@@ -92,7 +93,6 @@ export function useCrud<T extends object, E = any, RET = T>(
           setState((s) => ({ ...s, busy: true }));
         }
 
-        const id = state.data[props.idKey];
         let data: RET;
         if (id || props.alwaysPatch) {
           const body = getPatchData(state, props.forcePatch);
