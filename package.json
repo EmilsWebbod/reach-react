@@ -1,6 +1,6 @@
 {
   "name": "@ewb/reach-react",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "React Resource and Fetch stuff",
   "main": "./index.js",
   "types": "./index.d.ts",
@@ -52,6 +52,8 @@
   "homepage": "https://github.com/EmilsWebbod/reach-react#readme",
   "files": [
     "index.ts",
+    "index.d.ts",
+    "index.js",
     "core",
     "sockets"
   ],
