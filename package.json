@@ -13,35 +13,6 @@
     "prepublish": "npm run build",
     "preversion": "npm run build"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/EmilsWebbod/reach-react.git"
-  },
-  "keywords": [
-    "typescript",
-    "ts",
-    "react",
-    "reach",
-    "npm",
-    "fetch",
-    "crud",
-    "api"
-  ],
-  "author": "Ludens reklamebyrå",
-  "bugs": {
-    "url": "https://github.com/EmilsWebbod/reach-react/issues"
-  },
-  "homepage": "https://github.com/EmilsWebbod/reach-react#readme",
-  "files": [
-    "index.ts",
-    "core",
-    "sockets"
-  ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  },
   "devDependencies": {
     "@types/react": "^16.8.3",
     "@types/uuid": "^8.3.1",
@@ -59,5 +30,34 @@
   "dependencies": {
     "@ewb/reach": "^0.2.1",
     "uuid": "^8.3.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EmilsWebbod/reach-react.git"
+  },
+  "keywords": [
+    "typescript",
+    "ts",
+    "react",
+    "reach",
+    "npm",
+    "fetch",
+    "crud",
+    "api"
+  ],
+  "author": "EmilsWebbod <emil@webbod.no>",
+  "bugs": {
+    "url": "https://github.com/EmilsWebbod/reach-react/issues"
+  },
+  "homepage": "https://github.com/EmilsWebbod/reach-react#readme",
+  "files": [
+    "index.ts",
+    "core",
+    "sockets"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }
