@@ -4,11 +4,13 @@ import { ReachContext } from './ReachContext';
 
 export interface IUseCrudProps<T extends object, RET = T> {
   idKey: keyof T;
+  subPath?: string;
   disableAutoSave?: boolean;
   initWithGet?: boolean;
   reachOptions?: Omit<IReachOptions, 'method' | 'data'>;
   dontSetStateOnPost?: boolean;
   alwaysPatch?: boolean;
+  alwaysPost?: boolean;
   forcePatch?: (keyof T)[];
 }
 
@@ -54,7 +56,13 @@ export function useCrud<T extends object, E = any, RET = T>(
   const reach = useMemo(() => new Reach(service), [service]);
   const init = useRef(false);
   const initialData = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
-  const defaultState = useMemo(() => getNewState(path, initialData), [path, props.idKey, initialData]);
+  const defaultState = useMemo(
+    () => ({
+      ...getNewState(path, initialData),
+      busy: Boolean(props.initWithGet),
+    }),
+    [path, props.idKey, initialData]
+  );
   const ref = useRef<IUseCrudState<T, E>>(defaultState);
   const queue = useRef<IUseCrudState<T, E>[]>([]);
   const [state, setState] = useState<IUseCrudState<T, E>>(defaultState);
@@ -94,11 +102,16 @@ export function useCrud<T extends object, E = any, RET = T>(
         }
 
         let data: RET;
-        if (id || props.alwaysPatch) {
+        let apiPath = `${path}${id ? `/${id}` : ''}`;
+        if (props.subPath) {
+          apiPath += `/${props.subPath}`;
+        }
+
+        if (!props.alwaysPost && (id || props.alwaysPatch)) {
           const body = getPatchData(state, props.forcePatch);
-          data = await reach.api<RET>(`${path}/${id || ''}`, { ...opts, method: 'PATCH', body });
+          data = await reach.api<RET>(apiPath, { ...opts, method: 'PATCH', body });
         } else {
-          data = await reach.api<RET>(path, { ...opts, method: 'POST', body: ref.current.data });
+          data = await reach.api<RET>(apiPath, { ...opts, method: 'POST', body: ref.current.data });
         }
 
         if (queue.current.length > 0) {
@@ -117,7 +130,17 @@ export function useCrud<T extends object, E = any, RET = T>(
         return null;
       }
     },
-    [reach, path, props.idKey, opts, props.dontSetStateOnPost, props.alwaysPatch, props.forcePatch]
+    [
+      reach,
+      path,
+      props.idKey,
+      props.subPath,
+      opts,
+      props.dontSetStateOnPost,
+      props.alwaysPatch,
+      props.alwaysPost,
+      props.forcePatch,
+    ]
   );
 
   const set = useCallback(

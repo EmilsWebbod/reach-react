@@ -33,7 +33,7 @@ export interface IUseSearchActions<T> {
   search: (fetchQuery: IReachQuery) => Promise<T[]>;
 }
 
-export type IUseSearchNextFn<T> = () => Promise<T[] | null>;
+export type IUseSearchNextFn<T> = (searchQuery?: IReachQuery) => Promise<T[] | null>;
 
 export type IUseSearchRet<T, E> = [
   busy: boolean,
@@ -104,13 +104,16 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
     [path, query, responseToData, reachOptions]
   );
 
-  const next: IUseSearchNextFn<T> = useCallback(async () => {
-    if (state.items.length < state.count) {
-      setState((s) => ({ ...s, busy: true }));
-      return search(state.skip + state.limit);
-    }
-    return null;
-  }, [state.items.length, state.count, search, state.skip, state.limit]);
+  const next: IUseSearchNextFn<T> = useCallback(
+    async (searchQuery?: IReachQuery) => {
+      if (state.items.length < state.count) {
+        setState((s) => ({ ...s, busy: true }));
+        return search(state.skip + state.limit, searchQuery);
+      }
+      return null;
+    },
+    [state.items.length, state.count, search, state.skip, state.limit]
+  );
 
   const info: IUseSearchInfo = React.useMemo(
     () => ({
