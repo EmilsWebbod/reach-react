@@ -13,7 +13,7 @@ interface IUsePatchState<T, E> {
   error?: E;
 }
 
-export type IUsePatchFn<T> = <S>(id: string, body: Partial<T>, state?: S) => void;
+export type IUsePatchFn<T> = <S>(id: string, body: Partial<T>, state?: S, overridePath?: string) => void;
 export type IUsePatchRet<T, E> = [state: IUsePatchState<T, E>, patch: IUsePatchFn<T>];
 
 export function usePatch<T, E = any>(path: string, props: IUsePatchProps<T, E> = {}): IUsePatchRet<T, E> {
@@ -22,10 +22,11 @@ export function usePatch<T, E = any>(path: string, props: IUsePatchProps<T, E> =
   const [state, setState] = useState<IUsePatchState<T, E>>({ busy: true });
 
   const patch: IUsePatchFn<T> = useCallback(
-    async <S>(id: string, body: Partial<T>, state?: S) => {
+    async <S>(id: string, body: Partial<T>, state?: S, overridePath?: string) => {
       try {
+        const apiPath = overridePath || path;
         setState((s) => ({ ...s, busy: true }));
-        const data = await reach.api<T>(`${path}/${id}`, { method: 'PATCH', body, ...props });
+        const data = await reach.api<T>(`${apiPath}/${id}`, { method: 'PATCH', body, ...props });
         setState((s) => ({ ...s, busy: false, data }));
         if (typeof props.onPatch === 'function') {
           props.onPatch(data, state);
