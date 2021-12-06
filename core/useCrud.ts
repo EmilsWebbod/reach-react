@@ -90,7 +90,6 @@ export function useCrud<T extends object, E = any, RET = T>(
   const patch = useCallback(
     async (state: IUseCrudState<T, E>): Promise<RET | null> => {
       try {
-        console.log(state);
         const id = state.data[props.idKey];
         if (id && !Object.values(state.edited).some(Boolean)) {
           return null;
@@ -180,9 +179,9 @@ export function useCrud<T extends object, E = any, RET = T>(
 
   useEffect(() => {
     if (!init.current && props.initWithGet && id) {
-      init.current = true;
       actions.read();
     }
+    init.current = true;
   }, [props.initWithGet, id, actions.read]);
 
   return [state, set, save, setData, actions];

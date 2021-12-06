@@ -56,7 +56,6 @@ export function ReachSocketProvider<T>({
       let connection = connections.current.find((x) => x.namespace === namespace);
 
       if (!connection) {
-        console.log('new connection', namespace, event);
         connection = new ReachSocketConnection<T>(service, url, namespace, event, opts);
         connections.current.push(connection);
       }
