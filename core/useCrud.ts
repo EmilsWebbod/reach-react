@@ -59,7 +59,7 @@ export function useCrud<T extends object, E = any, RET = T>(
   const defaultState = useMemo(
     () => ({
       ...getNewState(path, initialData),
-      busy: Boolean(props.initWithGet),
+      busy: Boolean(props.initWithGet && initialData[props.idKey]),
     }),
     [path, props.idKey, initialData]
   );
@@ -90,6 +90,7 @@ export function useCrud<T extends object, E = any, RET = T>(
   const patch = useCallback(
     async (state: IUseCrudState<T, E>): Promise<RET | null> => {
       try {
+        console.log(state);
         const id = state.data[props.idKey];
         if (id && !Object.values(state.edited).some(Boolean)) {
           return null;
