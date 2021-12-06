@@ -16,3 +16,4 @@ src/
 
 yarn-error.log
 tsconfig.tsbuildinfo
+winpty.exe.stackdump

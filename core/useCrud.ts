@@ -67,20 +67,24 @@ export function useCrud<T extends object, E = any, RET = T>(
   const queue = useRef<IUseCrudState<T, E>[]>([]);
   const [state, setState] = useState<IUseCrudState<T, E>>(defaultState);
   const id = useMemo(() => state.data[props.idKey], [state.data, props.idKey]);
-  const endpoint = useMemo(() => `${path}/${id}`, [path, id]);
   const opts = useMemo(() => props.reachOptions || {}, [props.reachOptions]);
 
   const fetch = useCallback(
     (method: 'GET' | 'DELETE') => async () => {
       try {
-        const data = await reach.api<T>(endpoint, { ...opts, method });
-        ref.current = getNewState(endpoint, data);
+        if (!id) {
+          console.warn('Fetch used when id is undefined');
+          return;
+        }
+        const apiPath = `${path}/${id}`;
+        const data = await reach.api<T>(apiPath, { ...opts, method });
+        ref.current = getNewState(apiPath, data);
         setState(ref.current);
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
       }
     },
-    [reach, endpoint, opts]
+    [reach, opts, path, id]
   );
 
   const patch = useCallback(
