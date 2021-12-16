@@ -1,6 +1,6 @@
-import { io, Socket, ManagerOptions, SocketOptions } from 'socket.io-client';
 import { v4 } from 'uuid';
-import { ReachService } from '../../reach';
+import { io, Socket, ManagerOptions, SocketOptions } from 'socket.io-client';
+import { ReachService } from '@ewb/reach';
 
 export type SocketConnectionBroadcastFn<T extends any[]> = (...broadcast: T) => void;
 export type SocketConnectionFilterFn<T extends any[]> = (...data: T) => boolean;

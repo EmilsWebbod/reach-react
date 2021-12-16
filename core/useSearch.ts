@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { IReachOptions, IReachQuery, Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
 
@@ -46,9 +45,9 @@ export type IUseSearchRet<T, E> = [
 
 export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearchProps<T, RES>): IUseSearchRet<T, E> {
   const { limit = 10, responseToData, reachOptions } = props;
-  const init = React.useRef(false);
-  const service = React.useContext(ReachContext);
-  const [state, setState] = React.useState<IUseSearchState<T, E>>({
+  const init = useRef(false);
+  const service = useContext(ReachContext);
+  const [state, setState] = useState<IUseSearchState<T, E>>({
     busy: true,
     limit: limit || 10,
     skip: 0,
@@ -56,8 +55,8 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
     items: [],
     searchQuery: {},
   });
-  const reach = React.useMemo(() => new Reach(service), [service]);
-  const query = React.useMemo(
+  const reach = useMemo(() => new Reach(service), [service]);
+  const query = useMemo(
     () => ({
       ...props.query,
       ...state.searchQuery,
@@ -67,7 +66,7 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
     [props.query, state.limit, state.skip, state.searchQuery]
   );
 
-  const search = React.useCallback(
+  const search = useCallback(
     async (skip: number, searchQuery: IReachQuery = {}): Promise<T[]> => {
       try {
         let data = await reach.api<RES | T[]>(path, {
@@ -115,7 +114,7 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
     [state.items.length, state.count, search, state.skip, state.limit]
   );
 
-  const info: IUseSearchInfo = React.useMemo(
+  const info: IUseSearchInfo = useMemo(
     () => ({
       limit: state.limit,
       skip: state.skip,
@@ -124,7 +123,7 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
     [state.limit, state.skip, state.count]
   );
 
-  const actions: IUseSearchActions<T> = React.useMemo(
+  const actions: IUseSearchActions<T> = useMemo(
     () => ({
       unshift: (...items: T[]) => {
         setState((s) => ({ ...s, items: [...items, ...s.items], count: s.count + items.length }));
@@ -148,14 +147,14 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
     [search]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!init.current && !props.disableInit) {
       init.current = true;
       search(0).then();
     }
   }, [search, props.disableInit]);
 
-  return React.useMemo(
+  return useMemo(
     () => [state.busy, state.items, state.error, next, info, actions],
     [state.busy, state.items, state.error, next, info, actions]
   );

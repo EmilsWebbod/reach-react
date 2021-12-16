@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import { createContext, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { ReachSocketConnection, SocketConnectionOpts } from './SocketConnection';
 import { ReachContext } from '../core';
 
@@ -25,15 +25,15 @@ const defaultState: ContextProps = {
   },
 };
 
-export const ReachSocketContext = React.createContext<ContextProps>(defaultState);
+export const ReachSocketContext = createContext<ContextProps>(defaultState);
 
 export function ReachSocketProvider<T>({
   children,
   connections: defaultConnections = [],
-  socketOpts = React.useMemo(() => ({}), []),
+  socketOpts = useMemo(() => ({}), []),
   ...props
 }: Props & JSX.ElementChildrenAttribute) {
-  const service = React.useContext(ReachContext);
+  const service = useContext(ReachContext);
   const connections = useRef<ReachSocketConnection<any>[]>([]);
   const url = props.url || service.url;
 

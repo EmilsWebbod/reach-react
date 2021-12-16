@@ -1,8 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
-import { IUseFieldSchema, IUseFieldRet, IUseFieldValueRet } from './useFields';
-import { IUseCrudRet } from './useCrud';
+import { IUseFieldRet, IUseFieldValueRet } from './useFields';
 
 interface State<V, E> {
   error?: E;

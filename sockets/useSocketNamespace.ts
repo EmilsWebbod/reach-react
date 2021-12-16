@@ -1,5 +1,5 @@
-import { ReachSocketConnection, SocketConnectionBroadcastFn, SocketConnectionFilterFn } from './SocketConnection';
 import { useContext, useEffect, useRef } from 'react';
+import { ReachSocketConnection, SocketConnectionBroadcastFn, SocketConnectionFilterFn } from './SocketConnection';
 import { ReachSocketContext } from './ReachSocketContext';
 
 export interface IUseSocketProps<T extends object, B extends any[]> {
