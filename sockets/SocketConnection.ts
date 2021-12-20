@@ -56,7 +56,7 @@ export class ReachSocketConnection<T> {
   public on(event: string, fn: (...args: any[]) => void) {
     return this.socketConnection.on(event, (id, ...args) => {
       if (this.matchSocketId(id)) return;
-      fn(id, ...args);
+      fn(event, id, ...args);
     });
   }
 
@@ -72,10 +72,12 @@ export class ReachSocketConnection<T> {
       this.service.addSocket(this.socketConnection.id);
     });
     this.socketConnection.once('connect', () => {
-      this.socketConnection.onAny((id, ...broadcast: T[]) => {
+      this.socketConnection.onAny((event, id, ...broadcast: T[]) => {
         if (this.matchSocketId(id)) return;
         this.subscriptions.forEach((x) =>
-          x.filter ? x.filter(id, ...broadcast) && x.callback(id, ...broadcast) : x.callback(id, ...broadcast)
+          x.filter
+            ? x.filter(event, id, ...broadcast) && x.callback(event, id, ...broadcast)
+            : x.callback(event, id, ...broadcast)
         );
       });
     });

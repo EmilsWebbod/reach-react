@@ -24,6 +24,7 @@ export interface IUseFieldValueRet<V> extends IUseFieldValueIn<V> {
   id: string;
   edited: boolean;
   value: V;
+  meta?: any;
 }
 
 export type IUseFieldRet<T extends object, E, P extends {}, RET = T> = {
@@ -67,7 +68,8 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
       }
       const id = `${state.data[idKey]}-${key}`;
       const edited = Boolean(state.edited[key]);
-      return { ...schema[key]!, id, edited, value: state.data[key] } as IUseFieldValueRet<T[K]> & P;
+      const meta = state.meta[key];
+      return { ...schema[key]!, id, edited, value: state.data[key], meta } as IUseFieldValueRet<T[K]> & P;
     },
     [state, idKey, schema]
   );
