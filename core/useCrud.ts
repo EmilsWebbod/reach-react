@@ -181,7 +181,10 @@ export function useCrud<T extends object, E = any, RET = T>(
   const save = useCallback(() => patch(ref.current), [patch]);
 
   const setData = useCallback((data: Partial<T>, meta: IUseCrudMeta<T> = {}) => {
-    setState((s) => getNewState(s.path, { ...s.data, ...data }, s.edited, { ...s.meta, ...meta }));
+    setState((s) => {
+      ref.current = getNewState(s.path, { ...s.data, ...data }, s.edited, { ...s.meta, ...meta });
+      return ref.current;
+    });
   }, []);
 
   const actions = useMemo(() => ({ read: fetch('GET'), delete: fetch('DELETE') }), [fetch]);
