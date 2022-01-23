@@ -83,7 +83,7 @@ export function useCrud<T extends object, E = any, RET = T>(
         }
         const apiPath = `${path}/${id}`;
         const data = await reach.api<T>(apiPath, { ...opts, method });
-        ref.current = getNewState(apiPath, data, {}, ref.current.meta);
+        ref.current = getNewState(apiPath, { ...ref.current.data, ...data });
         setState(ref.current);
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
@@ -182,7 +182,14 @@ export function useCrud<T extends object, E = any, RET = T>(
 
   const setData = useCallback((data: Partial<T>, meta: IUseCrudMeta<T> = {}) => {
     setState((s) => {
-      ref.current = getNewState(s.path, { ...s.data, ...data }, s.edited, { ...s.meta, ...meta });
+      const edited = { ...s.edited };
+      // @ts-ignore
+      Object.keys(data).forEach((key: keyof T) => {
+        if (s.data[key] !== data[key]) {
+          edited[key] = true;
+        }
+      });
+      ref.current = getNewState(s.path, { ...s.data, ...data }, edited, { ...s.meta, ...meta });
       return ref.current;
     });
   }, []);
