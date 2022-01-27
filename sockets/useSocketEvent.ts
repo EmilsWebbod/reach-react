@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react';
 import { ReachNamespaceContext } from './ReachNamespaceContext';
 
-export function useSocketEvent<T>(event?: string, fn?: (...args: any[]) => void) {
+export function useSocketEvent(event?: string, fn?: (...args: any[]) => void) {
   const socketConnection = useContext(ReachNamespaceContext);
 
   useEffect(() => {
