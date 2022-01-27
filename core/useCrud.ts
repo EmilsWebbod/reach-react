@@ -14,12 +14,17 @@ export interface IUseCrudProps<T extends object, RET = T> {
   forcePatch?: (keyof T)[];
 }
 
-export interface IUseCrudState<T, E> {
+type IUseCrudMeta<T extends object> = {
+  [key in keyof T]?: any;
+};
+
+export interface IUseCrudState<T extends object, E> {
   path: string;
   busy: boolean;
   data: Partial<T>;
   initialData: Partial<T>;
   edited: Edited<T>;
+  meta: IUseCrudMeta<T>;
   error?: E;
 }
 
@@ -36,9 +41,9 @@ type ValidEvents = HTMLInputElement | HTMLTextAreaElement;
 export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
   key: K,
   disableAutosave?: boolean
-) => (event: ChangeEvent<ValidEvents> | T[K]) => void;
+) => (event: ChangeEvent<ValidEvents> | T[K], meta?: any) => void;
 export type IUseCrudSaveFn<T> = () => Promise<T | null>;
-export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>) => void;
+export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>, meta?: IUseCrudMeta<T>) => void;
 export type IUseCrudRet<T extends object, E, RET = T> = [
   state: IUseCrudState<T, E>,
   setField: IUseCrudSetFn<T>,
@@ -78,7 +83,7 @@ export function useCrud<T extends object, E = any, RET = T>(
         }
         const apiPath = `${path}/${id}`;
         const data = await reach.api<T>(apiPath, { ...opts, method });
-        ref.current = getNewState(apiPath, data);
+        ref.current = getNewState(apiPath, { ...ref.current.data, ...data });
         setState(ref.current);
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
@@ -124,7 +129,7 @@ export function useCrud<T extends object, E = any, RET = T>(
           ref.current.busy = false;
           await patch(patchState);
         } else if (!props.dontSetStateOnPost) {
-          ref.current = getNewState(path, data);
+          ref.current = getNewState(path, data, ref.current.meta);
           setState(ref.current);
         }
         return data as RET;
@@ -149,7 +154,7 @@ export function useCrud<T extends object, E = any, RET = T>(
 
   const set = useCallback(
     <K extends keyof T>(key: K, disableAutoSave = props.disableAutoSave) =>
-      (event: ChangeEvent<ValidEvents> | T[K]) => {
+      (event: ChangeEvent<ValidEvents> | T[K], meta?: any) => {
         const value =
           event && typeof event === 'object' && 'target' in event ? (event.target.value as unknown as T[K]) : event;
         setState((s) => {
@@ -158,6 +163,10 @@ export function useCrud<T extends object, E = any, RET = T>(
             edited: { ...s.edited, [key]: s.initialData[key] !== value },
             data: { ...s.data, [key]: value },
           };
+
+          if (meta) {
+            ref.current.meta[key] = meta;
+          }
 
           if (!disableAutoSave) {
             patch(ref.current);
@@ -171,8 +180,18 @@ export function useCrud<T extends object, E = any, RET = T>(
 
   const save = useCallback(() => patch(ref.current), [patch]);
 
-  const setData = useCallback((data: Partial<T>) => {
-    setState((s) => getNewState(s.path, { ...s.data, ...data }, s.edited));
+  const setData = useCallback((data: Partial<T>, meta: IUseCrudMeta<T> = {}) => {
+    setState((s) => {
+      const edited = { ...s.edited };
+      // @ts-ignore
+      Object.keys(data).forEach((key: keyof T) => {
+        if (s.data[key] !== data[key]) {
+          edited[key] = true;
+        }
+      });
+      ref.current = getNewState(s.path, { ...s.data, ...data }, edited, { ...s.meta, ...meta });
+      return ref.current;
+    });
   }, []);
 
   const actions = useMemo(() => ({ read: fetch('GET'), delete: fetch('DELETE') }), [fetch]);
@@ -202,12 +221,18 @@ function getPatchData<T extends object, E>(state: IUseCrudState<T, E>, forcePatc
   return patchData;
 }
 
-function getNewState<T>(path: string, data: Partial<T>, edited: Edited<T> = {}) {
+function getNewState<T extends object>(
+  path: string,
+  data: Partial<T>,
+  edited: Edited<T> = {},
+  meta: IUseCrudMeta<T> = {}
+) {
   return {
     path,
     busy: false,
     data,
     initialData: data,
     edited,
+    meta,
   };
 }
