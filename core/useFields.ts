@@ -49,7 +49,7 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
       newData[key] = data[key];
     }
     for (const key in schema) {
-      if (!newData[key] && schema[key]) {
+      if (!(key in newData) && schema[key]) {
         newData[key] = schema[key]!.defaultValue;
       }
     }
