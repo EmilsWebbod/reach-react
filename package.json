@@ -28,7 +28,7 @@
     "socket.io-client": "4.*.*"
   },
   "dependencies": {
-    "@ewb/reach": "^0.2.4",
+    "@ewb/reach": "^0.2.5",
     "uuid": "^8.3.2"
   },
   "repository": {

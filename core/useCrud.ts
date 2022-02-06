@@ -110,7 +110,7 @@ export function useCrud<T extends object, E = any, RET = T>(
           setState((s) => ({ ...s, busy: true }));
         }
 
-        let data: RET;
+        let data: RET | null;
         let apiPath = `${path}${id ? `/${id}` : ''}`;
         if (props.subPath) {
           apiPath += `/${props.subPath}`;
@@ -129,7 +129,7 @@ export function useCrud<T extends object, E = any, RET = T>(
           ref.current.busy = false;
           await patch(patchState);
         } else if (!props.dontSetStateOnPost) {
-          ref.current = getNewState(path, data, ref.current.meta);
+          ref.current = getNewState(path, data || ref.current.data, ref.current.meta);
           setState(ref.current);
         }
         return data as RET;
