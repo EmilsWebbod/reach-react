@@ -15,7 +15,7 @@ export interface IUseSocketSearchProps<T extends object, B extends any[]> {
 
 export function useSocketSearch<T extends object, E, RES, B extends any[]>(
   path: string,
-  props: IUseSearchProps<T, RES>,
+  props: IUseSearchProps<T, E, RES>,
   socketProps: IUseSocketSearchProps<T, B>
 ): IUseSearchRet<T, E> {
   const parentNamespace = useContext(ReachNamespaceContext);
