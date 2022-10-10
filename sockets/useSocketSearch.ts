@@ -13,11 +13,11 @@ export interface IUseSocketSearchProps<T extends object, B extends any[]> {
   idKey: keyof T;
 }
 
-export function useSocketSearch<T extends object, E, RES, B extends any[]>(
+export function useSocketSearch<T extends object, E, RES = T[], B extends any[] = any[]>(
   path: string,
   props: IUseSearchProps<T, E, RES>,
   socketProps: IUseSocketSearchProps<T, B>
-): IUseSearchRet<T, E> {
+): IUseSearchRet<T, E, RES> {
   const parentNamespace = useContext(ReachNamespaceContext);
   const [busy, items, error, next, info, actions] = useSearch<T, E, RES>(path, props);
   const namespace = socketProps.namespace || parentNamespace?.namespace;

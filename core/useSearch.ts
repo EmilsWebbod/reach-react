@@ -18,8 +18,9 @@ export interface IUseSearchProps<T, E, RES> {
   query?: IReachOptions['query'];
   responseToData?: (
     body: RES,
-    state: IUseSearchState<T, E>
-  ) => Partial<IUseSearchState<T, E>> & Pick<IUseSearchState<T, E>, 'items'>;
+    state: IUseSearchState<T, E, RES>,
+    paginate: boolean,
+  ) => Partial<IUseSearchState<T, E, RES>> & Pick<IUseSearchState<T, E, RES>, 'items'>;
   reachOptions?: Omit<IReachOptions, 'query'>;
   disableInit?: boolean;
   defaultItems?: T[];
@@ -28,17 +29,20 @@ export interface IUseSearchProps<T, E, RES> {
   countHeader?: string;
 }
 
-export interface IUseSearchState<T, E> extends IUseSearchInfo {
+export interface IUseSearchState<T, E, RES> extends IUseSearchInfo<RES> {
   busy: boolean;
   items: T[];
   searchQuery: IReachQuery;
-  error?: E;
+  error?: E | null;
 }
 
-export interface IUseSearchInfo {
+export interface IUseSearchInfo<RES> {
   count: number;
   limit: number;
   skip: number;
+  hasFetched: boolean;
+  json?: RES;
+  response?: Response;
 }
 
 export interface IUseSearchActions<T> {
@@ -52,36 +56,37 @@ export interface IUseSearchActions<T> {
 
 export type IUseSearchNextFn<T> = (fetchQuery?: IReachQuery) => Promise<T[] | null>;
 
-export type IUseSearchRet<T, E> = [
+export type IUseSearchRet<T, E, RES> = [
   busy: boolean,
   data: T[],
-  error: E | undefined,
+  error: E | undefined | null,
   next: IUseSearchNextFn<T>,
-  info: IUseSearchInfo,
+  info: IUseSearchInfo<RES>,
   actions: IUseSearchActions<T>
 ];
 
-const toInitialState = <T, E, RES>(props: IUseSearchProps<T, E, RES>): IUseSearchState<T, E> => ({
+const toInitialState = <T, E, RES>(props: IUseSearchProps<T, E, RES>): IUseSearchState<T, E, RES> => ({
   busy: !props.disableInit,
   limit: props.limit || LIMIT,
   skip: props.skip || SKIP,
   count: props.count || COUNT,
   items: props.defaultItems || [],
   searchQuery: props.query || {},
+  hasFetched: false,
 });
 
-const toInitialQuery = <T, E, RES>(state: IUseSearchState<T, E>, skipKey: string, limitKey = LIMIT_KEY) => ({
+const toInitialQuery = <T, E, RES>(state: IUseSearchState<T, E, RES>, skipKey: string, limitKey = LIMIT_KEY) => ({
   ...state.searchQuery,
   [limitKey]: state.limit,
   [skipKey]: state.skip,
 });
 
-export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearchProps<T, E, RES>): IUseSearchRet<T, E> {
+export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearchProps<T, E, RES>): IUseSearchRet<T, E, RES> {
   const { skipKey = SKIP_KEY, countHeader = COUNT_HEADER, responseToData, reachOptions, skipPages } = props;
   const init = useRef(false);
   const service = useContext(ReachContext);
   const initialState = useMemo(() => toInitialState<T, E, RES>(props), [props]);
-  const [state, setState] = useState<IUseSearchState<T, E>>(initialState);
+  const [state, setState] = useState<IUseSearchState<T, E, RES>>(initialState);
   const initialQuery = useRef(toInitialQuery(state, skipKey, props.limitKey));
   const searchQuery = useRef(initialQuery.current);
   const reach = useMemo(() => new Reach(service), [service]);
@@ -93,19 +98,20 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
         if (!paginate) {
           searchQuery.current = { ...initialQuery.current, ...(reachQuery || {}) };
         }
+        const skipValue = skipPages ? skip : skip * state.limit;
         const query = reachQuery
-          ? { ...initialQuery.current, ...reachQuery, [skipKey]: skip }
-          : { ...initialQuery.current, [skipKey]: skip };
-        let response = await reach.api<Response>(path, { ...reachOptions, query, noJson: true });
-        const data = (await response.json()) as RES | T[];
-        const newState = getNewStateFromResponse<T, E>(response, skip, query, countHeader);
-        const toNewItems = (s: IUseSearchState<T, E>, items: T[]) =>
+          ? { ...initialQuery.current, ...reachQuery, [skipKey]: skipValue }
+          : { ...initialQuery.current, [skipKey]: skipValue };
+        const response = await reach.api<Response>(path, { ...reachOptions, query, noJson: true });
+        const json = (await response.json()) as RES;
+        const newState = getNewStateFromResponse<T, E, RES>(response, json, skip, query, countHeader);
+        const toNewItems = (s: IUseSearchState<T, E, RES>, items: T[]) =>
           items ? (paginate ? [...s.items, ...items] : items) : s.items;
 
         if (typeof responseToData === 'function') {
           let retItems: T[] = [];
           setState((s) => {
-            const { items, ...responseState } = responseToData(data as RES, { ...s, ...newState });
+            const { items, ...responseState } = responseToData(json, { ...s, ...newState }, paginate);
             if (items) {
               retItems = items;
             }
@@ -113,38 +119,39 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
           });
           return retItems;
         }
-        if (!Array.isArray(data)) {
-          throw new Error('useSearch error. data response is not typeof array. Use responseToData to parse response');
+        if (!Array.isArray(json)) {
+          throw new Error('useSearch error. json response is not typeof array. Use responseToData to parse response');
         }
-        setState((s) => ({ ...s, ...newState, items: toNewItems(s, data) }));
-        return data as T[];
+        setState((s) => ({ ...s, ...newState, items: toNewItems(s, json) }));
+        return json;
       } catch (error: any) {
         setState((s) => ({ ...s, busy: false, error }));
         return [] as T[];
       }
     },
-    [path, responseToData, reachOptions, skipKey, countHeader, state.skip, initialState.skip]
+    [path, responseToData, reachOptions, skipKey, countHeader, initialState.skip, state.limit, skipPages]
   );
 
   const next: IUseSearchNextFn<T> = useCallback(
     async (searchQuery?: IReachQuery) => {
       if (state.items.length < state.count) {
         setState((s) => ({ ...s, busy: true }));
-        const skip = skipPages ? state.skip + 1 : state.skip + state.limit;
-        return search(skip, searchQuery);
+        return search(state.skip + 1, searchQuery);
       }
       return null;
     },
-    [state.items.length, state.count, search, state.skip, state.limit, skipPages]
+    [state.items.length, state.count, search, state.skip]
   );
 
-  const info: IUseSearchInfo = useMemo(
+  const info: IUseSearchInfo<RES> = useMemo(
     () => ({
       limit: state.limit,
       skip: state.skip,
       count: state.count,
+      hasFetched: state.hasFetched,
+      json: state.json,
     }),
-    [state.limit, state.skip, state.count]
+    [state.limit, state.skip, state.count, state.hasFetched, state.json]
   );
 
   const actions: IUseSearchActions<T> = useMemo(
@@ -184,13 +191,14 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
   );
 }
 
-function getNewStateFromResponse<T, E>(
+function getNewStateFromResponse<T, E, RES>(
   response: Response,
+  json: RES,
   skip: number,
   searchQuery: object,
   countHeader?: string
-): Partial<IUseSearchState<T, E>> {
-  const newState: Partial<IUseSearchState<T, E>> = { skip, searchQuery, busy: false };
+): Partial<IUseSearchState<T, E, RES>> {
+  const newState: Partial<IUseSearchState<T, E, RES>> = { skip, searchQuery, busy: false, hasFetched: true, error: null, json };
   if (countHeader) {
     const count = Number(response.headers.get(countHeader));
     if (count && !isNaN(count)) {
