@@ -1,0 +1,16 @@
+# Folders
+.husky/
+.idea/
+node_modules
+
+# Files
+yarn.lock
+.gitattributes
+.gitignore
+.prettierrc
+tsconfig.tsbuildinfo
+
+# Typescript files
+*.ts
+*.tsx
+!*.d.ts
