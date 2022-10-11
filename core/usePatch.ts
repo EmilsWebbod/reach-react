@@ -1,11 +1,9 @@
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
 import { IReachOptions, Reach } from '@ewb/reach';
+import type { IUseProps } from './types';
 import { ReachContext } from './ReachContext';
 
-export interface IUsePatchProps<T, E> extends Omit<IReachOptions, 'method'> {
-  onError?: <S>(error: E, state?: S) => void;
-  onPatch?: <S>(data: T, state?: S) => void;
-}
+export type IUsePatchProps<T, E> = Pick<IUseProps<T>, 'defaultBody' | 'onPatch' | 'onError'>;
 
 interface IUsePatchState<T, E> {
   busy: boolean;
@@ -13,33 +11,39 @@ interface IUsePatchState<T, E> {
   error?: E;
 }
 
-export type IUsePatchFn<T> = <S>(id: string, body: Partial<T>, state?: S, overridePath?: string) => void;
-export type IUsePatchRet<T, E> = [state: IUsePatchState<T, E>, patch: IUsePatchFn<T>];
+export type IUsePatchFn<T> = <S = unknown>(id: string, body: Partial<T>) => Promise<T | null>;
+export type IUsePatchRet<T, E> = [
+  state: IUsePatchState<T, E>,
+  patch: IUsePatchFn<T>,
+  setState: Dispatch<SetStateAction<IUsePatchState<T, E>>>
+];
 
-export function usePatch<T, E = any>(path: string, props: IUsePatchProps<T, E> = {}): IUsePatchRet<T, E> {
+export function usePatch<T, E = any>(
+  path: string,
+  props?: IUsePatchProps<T, E>,
+  reachProps?: Omit<IReachOptions, 'method'>
+): IUsePatchRet<T, E> {
   const service = useContext(ReachContext);
   const reach = useMemo(() => new Reach(service), [service]);
   const [state, setState] = useState<IUsePatchState<T, E>>({ busy: true });
 
   const patch: IUsePatchFn<T> = useCallback(
-    async <S>(id: string, body: Partial<T>, state?: S, overridePath?: string) => {
+    async <S = unknown>(id: string, overrideBody: Partial<T>): Promise<T | null> => {
       try {
-        const apiPath = overridePath || path;
+        const body = { ...(props?.defaultBody || {}), ...overrideBody };
         setState((s) => ({ ...s, busy: true }));
-        const data = await reach.api<T>(`${apiPath}/${id}`, { method: 'PATCH', body, ...props });
+        const data = await reach.api<T>(`${path}/${id}`, { method: 'PATCH', body, ...reachProps });
         setState((s) => ({ ...s, busy: false, data }));
-        if (typeof props.onPatch === 'function') {
-          props.onPatch(data, state);
-        }
-      } catch (error) {
+        if (props?.onPatch) props.onPatch(data);
+        return data;
+      } catch (error: any) {
         setState((s) => ({ ...s, busy: false, error }));
-        if (typeof props.onError === 'function') {
-          props.onError(error, state);
-        }
+        if (props?.onError) props.onError(error);
+        return null;
       }
     },
-    [path, props]
+    [path, props, reachProps]
   );
 
-  return useMemo(() => [state, patch], [state, patch]);
+  return useMemo(() => [state, patch, setState], [state, patch, setState]);
 }

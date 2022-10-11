@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@ewb/reach@^0.2.6":
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/@ewb/reach/-/reach-0.2.6.tgz#c70c59e4c58592bb60f10177c77eefad03275aa9"
-  integrity sha512-e+MCR02phILf8MXqJljKVXczTv/iieIpo3jMAo0bUT+g0/SwZeKFx0GT92l/NJh95unj458GEO9V4HFOBI7yog==
+"@ewb/reach@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@ewb/reach/-/reach-0.3.0.tgz#70423e396e5fb35b01116f2a57f6cc0291158ffd"
+  integrity sha512-WeSgcXw6D7LI7QNIGd9rWDCAHlS6wgE6EMgA/eJeT21fViVSLIG9/14yN7UA/EL4jCoFb5HjpbmZwJvP70pJaw==
 
 "@socket.io/component-emitter@~3.0.0":
   version "3.0.0"

@@ -3,5 +3,5 @@ export * from './ReachSocketContext';
 export * from './useSocketEvent';
 export * from './useSocketFields';
 export * from './useSocketNamespace';
-export * from './useSocketRead';
+export * from './useSocketGet.js';
 export * from './useSocketSearch';
