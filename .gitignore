@@ -12,7 +12,7 @@ src/
 .env
 
 *.js
-*d.ts
+*.d.ts
 
 yarn-error.log
 tsconfig.tsbuildinfo
