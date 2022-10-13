@@ -19,7 +19,8 @@ export interface IUseSearchProps<T, E, RES> {
   responseToData?: (
     body: RES,
     state: IUseSearchState<T, E, RES>,
-    paginate: boolean,
+    response: Response,
+    paginate: boolean
   ) => Partial<IUseSearchState<T, E, RES>> & Pick<IUseSearchState<T, E, RES>, 'items'>;
   reachOptions?: Omit<IReachOptions, 'query'>;
   disableInit?: boolean;
@@ -81,7 +82,10 @@ const toInitialQuery = <T, E, RES>(state: IUseSearchState<T, E, RES>, skipKey: s
   [skipKey]: state.skip,
 });
 
-export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearchProps<T, E, RES>): IUseSearchRet<T, E, RES> {
+export function useSearch<T, E = any, RES = T[]>(
+  path: string,
+  props: IUseSearchProps<T, E, RES>
+): IUseSearchRet<T, E, RES> {
   const { skipKey = SKIP_KEY, countHeader = COUNT_HEADER, responseToData, reachOptions, skipPages } = props;
   const init = useRef(false);
   const service = useContext(ReachContext);
@@ -111,7 +115,7 @@ export function useSearch<T, E = any, RES = T[]>(path: string, props: IUseSearch
         if (typeof responseToData === 'function') {
           let retItems: T[] = [];
           setState((s) => {
-            const { items, ...responseState } = responseToData(json, { ...s, ...newState }, paginate);
+            const { items, ...responseState } = responseToData(json, { ...s, ...newState }, response, paginate);
             if (items) {
               retItems = items;
             }
@@ -198,7 +202,14 @@ function getNewStateFromResponse<T, E, RES>(
   searchQuery: object,
   countHeader?: string
 ): Partial<IUseSearchState<T, E, RES>> {
-  const newState: Partial<IUseSearchState<T, E, RES>> = { skip, searchQuery, busy: false, hasFetched: true, error: null, json };
+  const newState: Partial<IUseSearchState<T, E, RES>> = {
+    skip,
+    searchQuery,
+    busy: false,
+    hasFetched: true,
+    error: null,
+    json,
+  };
   if (countHeader) {
     const count = Number(response.headers.get(countHeader));
     if (count && !isNaN(count)) {
