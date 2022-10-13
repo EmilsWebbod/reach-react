@@ -11,6 +11,7 @@ const COUNT_HEADER = 'X-Total-Count';
 
 export interface IUseSearchProps<T, E, RES> {
   limit?: number;
+  defaultSkip?: number;
   skip?: number;
   count?: number;
   // Skips with 1 + 1 instead of skip + limit
@@ -69,7 +70,7 @@ export type IUseSearchRet<T, E, RES> = [
 const toInitialState = <T, E, RES>(props: IUseSearchProps<T, E, RES>): IUseSearchState<T, E, RES> => ({
   busy: !props.disableInit,
   limit: props.limit || LIMIT,
-  skip: props.skip || SKIP,
+  skip: props.skip || props.defaultSkip || SKIP,
   count: props.count || COUNT,
   items: props.defaultItems || [],
   searchQuery: props.query || {},
@@ -175,11 +176,11 @@ export function useSearch<T, E = any, RES = T[]>(
           return { ...s, items: [...s.items, ...items], count: s.count + items.length };
         });
       },
-      search: (query: IReachQuery) => search(initialState.skip, query),
+      search: (query: IReachQuery) => search(props.defaultSkip || 0, query),
       map: (fn: (items: T) => T) => setState((s) => ({ ...s, items: s.items.map(fn) })),
       filter: (fn: (item: T) => boolean) => setState((s) => ({ ...s, items: s.items.filter(fn) })),
     }),
-    [search, initialState.skip]
+    [search, props.defaultSkip]
   );
 
   useEffect(() => {
