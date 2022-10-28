@@ -9,8 +9,11 @@ yarn.lock
 .gitignore
 .prettierrc
 tsconfig.tsbuildinfo
+yarn-error.log
+winpty.exe.stackdump
 
 # Typescript files
 *.ts
 *.tsx
+*.map.js
 !*.d.ts

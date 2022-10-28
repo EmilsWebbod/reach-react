@@ -23,5 +23,5 @@ export function ReachNamespaceProvider<T extends any[]>({
     return newSocket.subscribe<T>(broadcast);
   }, [namespace, broadcast, addConnection, broadcast]);
 
-  return <ReachNamespaceContext.Provider value={socket}>{children}</ReachNamespaceContext.Provider>;
+  return <ReachNamespaceContext.Provider value={socket}>{children as any}</ReachNamespaceContext.Provider>;
 }

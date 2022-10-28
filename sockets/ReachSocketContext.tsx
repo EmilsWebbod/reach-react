@@ -78,7 +78,7 @@ export function ReachSocketProvider<T>({
 
   return (
     <ReachSocketContext.Provider value={{ connections, addConnection, removeConnection }}>
-      {useMemo(() => children, [children])}
+      {useMemo(() => children as any, [children])}
     </ReachSocketContext.Provider>
   );
 }
