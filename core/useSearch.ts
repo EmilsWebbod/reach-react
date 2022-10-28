@@ -121,7 +121,7 @@ export function useSearch<T, E = any, RES = T[]>(
             if (items) {
               retItems = items;
             }
-            return { ...s, ...responseState, items: toNewItems(s, items) };
+            return { ...s, ...newState, ...responseState, items: toNewItems(s, items) };
           });
           return retItems;
         }
