@@ -25,6 +25,7 @@ export interface IUseCrudState<T extends object, E> {
   initialData: Partial<T>;
   edited: Edited<T>;
   meta: IUseCrudMeta<T>;
+  dirty: boolean;
   error?: E;
 }
 
@@ -129,7 +130,7 @@ export function useCrud<T extends object, E = any, RET = T>(
           ref.current.busy = false;
           await patch(patchState);
         } else if (!props.dontSetStateOnPost) {
-          ref.current = getNewState(path, data || ref.current.data, ref.current.meta);
+          ref.current = getNewState(path, data || ref.current.data, {}, ref.current.meta);
           setState(ref.current);
         }
         return data as RET;
@@ -158,9 +159,11 @@ export function useCrud<T extends object, E = any, RET = T>(
         const value =
           event && typeof event === 'object' && 'target' in event ? (event.target.value as unknown as T[K]) : event;
         setState((s) => {
+          const edited = { ...s.edited, [key]: s.initialData[key] !== value };
           ref.current = {
             ...s,
-            edited: { ...s.edited, [key]: s.initialData[key] !== value },
+            edited,
+            dirty: Object.values(edited).some(Boolean),
             data: { ...s.data, [key]: value },
           };
 
@@ -230,6 +233,7 @@ function getNewState<T extends object>(
   return {
     path,
     busy: false,
+    dirty: Object.values(edited).some(Boolean),
     data,
     initialData: data,
     edited,
