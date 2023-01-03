@@ -113,6 +113,9 @@ export function useSearch<T, E = any, RES = T[]>(
         const newState = getNewStateFromResponse<T, E, RES>(response, json, querySkip, query, countHeader);
         const toNewItems = (s: IUseSearchState<T, E, RES>, items: T[]) =>
           items ? (paginate ? [...s.items, ...items] : items) : s.items;
+        if (paginate) {
+          ++_skip.current;
+        }
 
         if (typeof responseToData === 'function') {
           let retItems: T[] = [];
@@ -142,7 +145,7 @@ export function useSearch<T, E = any, RES = T[]>(
     async (searchQuery?: IReachQuery) => {
       if (state.items.length < state.count) {
         setState((s) => ({ ...s, busy: true }));
-        return search(++_skip.current, searchQuery);
+        return search(_skip.current + 1, searchQuery);
       }
       return null;
     },
