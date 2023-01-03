@@ -106,7 +106,7 @@ export function useSearch<T, E = any, RES = T[]>(
         }
         const querySkip = skipPages ? skip : skip * state.limit;
         const query = reachQuery
-          ? { ...initialQuery.current, ...reachQuery, [skipKey]: _skip.current }
+          ? { ...initialQuery.current, ...reachQuery, [skipKey]: querySkip }
           : { ...initialQuery.current, [skipKey]: querySkip };
         const response = await reach.api<Response>(path, { ...reachOptions, query, noJson: true });
         const json = (await response.json()) as RES;
