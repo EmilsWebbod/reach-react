@@ -104,13 +104,13 @@ export function useSearch<T, E = any, RES = T[]>(
         if (!paginate) {
           searchQuery.current = { ...initialQuery.current, ...(reachQuery || {}) };
         }
-        _skip.current = skipPages ? skip : skip * state.limit;
+        const querySkip = skipPages ? skip : skip * state.limit;
         const query = reachQuery
           ? { ...initialQuery.current, ...reachQuery, [skipKey]: _skip.current }
-          : { ...initialQuery.current, [skipKey]: _skip.current };
+          : { ...initialQuery.current, [skipKey]: querySkip };
         const response = await reach.api<Response>(path, { ...reachOptions, query, noJson: true });
         const json = (await response.json()) as RES;
-        const newState = getNewStateFromResponse<T, E, RES>(response, json, _skip.current, query, countHeader);
+        const newState = getNewStateFromResponse<T, E, RES>(response, json, querySkip, query, countHeader);
         const toNewItems = (s: IUseSearchState<T, E, RES>, items: T[]) =>
           items ? (paginate ? [...s.items, ...items] : items) : s.items;
 
@@ -142,7 +142,7 @@ export function useSearch<T, E = any, RES = T[]>(
     async (searchQuery?: IReachQuery) => {
       if (state.items.length < state.count) {
         setState((s) => ({ ...s, busy: true }));
-        return search(_skip.current + 1, searchQuery);
+        return search(++_skip.current, searchQuery);
       }
       return null;
     },
