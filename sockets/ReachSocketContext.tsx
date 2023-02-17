@@ -41,16 +41,6 @@ export function ReachSocketProvider<T>({
     throw new Error('ReachSocketProvider needs url. Provide in ReachProvider or Props');
   }
 
-  useEffect(() => {
-    for (const connection of defaultConnections) {
-      if (!connections.current.some((x) => x.namespace !== connection.namespace)) {
-        connections.current.push(
-          new ReachSocketConnection<any>(service, url, connection.namespace, connection.event, socketOpts)
-        );
-      }
-    }
-  }, [service, url, defaultConnections, socketOpts]);
-
   const addConnection = useCallback(
     (namespace: string = '', event: string = '', opts: SocketConnectionOpts = socketOpts) => {
       let connection = connections.current.find((x) => x.namespace === namespace);
@@ -76,9 +66,25 @@ export function ReachSocketProvider<T>({
     [connections, url]
   );
 
+  useEffect(() => {
+    for (const connection of defaultConnections) {
+      if (!connections.current.some((x) => x.namespace !== connection.namespace)) {
+        connections.current.push(
+          new ReachSocketConnection<any>(service, url, connection.namespace, connection.event, socketOpts)
+        );
+      }
+    }
+  }, [service, url, defaultConnections, socketOpts]);
+
+  useEffect(() => {
+    return () => {
+      connections.current.map((x) => x.disconnect());
+    };
+  }, []);
+
   return (
     <ReachSocketContext.Provider value={{ connections, addConnection, removeConnection }}>
-      {useMemo(() => children as any, [children])}
+      {children as any}
     </ReachSocketContext.Provider>
   );
 }
