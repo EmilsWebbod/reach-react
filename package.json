@@ -1,6 +1,6 @@
 {
   "name": "@ewb/reach-react",
-  "version": "0.6.12",
+  "version": "0.6.13",
   "description": "React Resource and Fetch stuff",
   "main": "./index.js",
   "types": "./index.d.ts",
@@ -28,7 +28,7 @@
     "socket.io-client": "4.*.*"
   },
   "dependencies": {
-    "@ewb/reach": "^0.3.3",
+    "@ewb/reach": "^0.3.4",
     "uuid": "^8.3.2"
   },
   "repository": {
