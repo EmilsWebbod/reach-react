@@ -29,7 +29,7 @@ export function useReach<T, E = any>(
   reachOptions?: Omit<IReachOptions, 'method'>
 ): IUseReachRet<T, E> {
   const service = useContext(ReachContext);
-  const [state, setState] = useState<IUseReachState<T, E>>({ busy: true });
+  const [state, setState] = useState<IUseReachState<T, E>>({ busy: false });
   const reach = useMemo(() => new Reach(service), [service]);
 
   const fetch = useCallback(
@@ -39,6 +39,7 @@ export function useReach<T, E = any>(
       overrideBody: Partial<T> = {}
     ): Promise<T | null> => {
       try {
+        setState((s) => ({ ...s, busy: true }));
         const apiPath = typeof idOrBody === 'string' ? `${path}/${idOrBody}` : path;
         const override = typeof idOrBody === 'string' ? overrideBody : idOrBody;
         const body = { ...(props?.defaultBody || {}), ...override };

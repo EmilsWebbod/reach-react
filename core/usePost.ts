@@ -32,6 +32,7 @@ export function usePost<T, E = any>(
   const post = useCallback(
     async (overrideBody: Partial<T> = {}): Promise<T | null> => {
       try {
+        setState((s) => ({ ...s, busy: true }));
         const body = { ...(props?.defaultBody || {}), ...overrideBody };
         const data = await reach.api<T>(path, { ...reachOptions, body, method: 'POST' });
         setState((s) => ({ ...s, busy: false, data }));

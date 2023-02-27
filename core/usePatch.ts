@@ -25,13 +25,13 @@ export function usePatch<T, E = any>(
 ): IUsePatchRet<T, E> {
   const service = useContext(ReachContext);
   const reach = useMemo(() => new Reach(service), [service]);
-  const [state, setState] = useState<IUsePatchState<T, E>>({ busy: true });
+  const [state, setState] = useState<IUsePatchState<T, E>>({ busy: false });
 
   const patch: IUsePatchFn<T> = useCallback(
     async <S = unknown>(id: string, overrideBody: Partial<T>): Promise<T | null> => {
       try {
-        const body = { ...(props?.defaultBody || {}), ...overrideBody };
         setState((s) => ({ ...s, busy: true }));
+        const body = { ...(props?.defaultBody || {}), ...overrideBody };
         const data = await reach.api<T>(`${path}/${id}`, { method: 'PATCH', body, ...reachProps });
         setState((s) => ({ ...s, busy: false, data }));
         if (props?.onPatch) props.onPatch(data);

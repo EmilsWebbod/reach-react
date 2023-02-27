@@ -23,12 +23,13 @@ export function useDelete<T, E = any>(
   reachOptions?: Omit<IReachOptions, 'method'>
 ): IUseDeleteRet<T, E> {
   const service = useContext(ReachContext);
-  const [state, setState] = useState<IUseDeleteState<T, E>>({ busy: true });
+  const [state, setState] = useState<IUseDeleteState<T, E>>({ busy: false });
   const reach = useMemo(() => new Reach(service), [service]);
 
   const del = useCallback(
     async (id: string): Promise<T | null> => {
       try {
+        setState((s) => ({ ...s, busy: true }));
         const data = await reach.api<T>(`${path}/${id}`, { ...reachOptions, method: 'DELETE' });
         setState((s) => ({ ...s, busy: false, data }));
         if (props?.onDelete) props.onDelete(data);

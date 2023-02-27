@@ -26,12 +26,13 @@ export function useGet<T, E = any>(
 ): IUseGetRet<T, E> {
   const init = useRef(false);
   const service = useContext(ReachContext);
-  const [state, setState] = useState<IUseGetState<T, E>>({ busy: true });
-  const reach = useMemo(() => new Reach(service), [service]);
   const disableInit = useMemo(() => props?.disableInit, [props]);
+  const reach = useMemo(() => new Reach(service), [service]);
+  const [state, setState] = useState<IUseGetState<T, E>>({ busy: !disableInit });
 
   const get = useCallback(async (): Promise<T | null> => {
     try {
+      setState((s) => (!s.busy ? { ...s, busy: true } : s));
       const data = await reach.api<T>(path, reachOptions);
       setState((s) => ({ ...s, busy: false, data }));
       if (props?.onGet) props.onGet(data);
