@@ -23,7 +23,7 @@ export function usePost<T, E = any>(
   reachOptions?: Omit<IReachOptions, 'method'>
 ): IUsePostRet<T, E> {
   const service = useContext(ReachContext);
-  const [state, setState] = useState<IUsePostState<T, E>>({ busy: true });
+  const [state, setState] = useState<IUsePostState<T, E>>({ busy: true, data: (props?.defaultBody as T) || undefined });
   const reach = useMemo(() => new Reach(service), [service]);
 
   const post = useCallback(
