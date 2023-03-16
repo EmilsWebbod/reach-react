@@ -159,7 +159,7 @@ export function useCrud<T extends object, E = any, RET = T>(
         const value =
           event && typeof event === 'object' && 'target' in event ? (event.target.value as unknown as T[K]) : event;
         setState((s) => {
-          const edited = { ...s.edited, [key]: s.initialData[key] !== value };
+          const edited = { ...s.edited, [key]: !s.initialData[key] || s.initialData[key] !== value };
           ref.current = {
             ...s,
             edited,

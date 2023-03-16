@@ -180,7 +180,10 @@ export function useSearch<T, E = any, RES = T[]>(
           return { ...s, items: [...s.items, ...items], count: s.count + items.length };
         });
       },
-      search: (query: IReachQuery) => search(props.defaultSkip || 0, query),
+      search: (query: IReachQuery) => {
+        _skip.current = 0;
+        return search(props.defaultSkip || 0, query);
+      },
       map: (fn: (items: T) => T) => setState((s) => ({ ...s, items: s.items.map(fn) })),
       filter: (fn: (item: T) => boolean) => setState((s) => ({ ...s, items: s.items.filter(fn) })),
     }),

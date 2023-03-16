@@ -5,6 +5,7 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "scripts": {
+    "dev": "yarn build:watch",
     "start": "yarn build:watch",
     "build": "tsc --incremental",
     "build:watch": "tsc --watch --incremental",
