@@ -1,4 +1,14 @@
-import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { IReachOptions, Reach } from '@ewb/reach';
 import { ReachContext } from './ReachContext';
 
@@ -46,12 +56,20 @@ export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
 export type IUseCrudSaveFn<T> = () => Promise<T | null>;
 export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>, meta?: IUseCrudMeta<T>) => void;
 export type IUseCrudRet<T extends object, E, RET = T> = [
-  state: IUseCrudState<T, E>,
-  setField: IUseCrudSetFn<T>,
-  save: IUseCrudSaveFn<RET>,
-  set: IUseCrudSetDataFn<T>,
-  actions: IUseCrudActions
-];
+  IUseCrudState<T, E>,
+  IUseCrudSetFn<T>,
+  IUseCrudSaveFn<RET>,
+  IUseCrudSetDataFn<T>,
+  IUseCrudActions,
+  Dispatch<SetStateAction<IUseCrudState<T, E>>>
+] & {
+  state: IUseCrudState<T, E>;
+  set: IUseCrudSetFn<T>;
+  save: IUseCrudSaveFn<RET>;
+  setData: IUseCrudSetDataFn<T>;
+  actions: IUseCrudActions;
+  setState: Dispatch<SetStateAction<IUseCrudState<T, E>>>;
+};
 
 export function useCrud<T extends object, E = any, RET = T>(
   path: string,
@@ -206,7 +224,16 @@ export function useCrud<T extends object, E = any, RET = T>(
     init.current = true;
   }, [props.initWithGet, id, actions.read]);
 
-  return [state, set, save, setData, actions];
+  return useMemo((): IUseCrudRet<T, E, RET> => {
+    const ret = [state, set, save, setData, actions, setState] as IUseCrudRet<T, E, RET>;
+    ret.state = state;
+    ret.set = set;
+    ret.save = save;
+    ret.setData = setData;
+    ret.actions = actions;
+    ret.setState = setState;
+    return ret;
+  }, [state, set, save, setData, actions, setState]);
 }
 
 function getPatchData<T extends object, E>(state: IUseCrudState<T, E>, forcePatch?: (keyof T)[]) {
