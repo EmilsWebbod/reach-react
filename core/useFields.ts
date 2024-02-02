@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from 'react';
+import { Dispatch, useCallback, useMemo } from 'react';
 import {
   IUseCrudActions,
   IUseCrudProps,
+  IUseCrudRet,
   IUseCrudSaveFn,
   IUseCrudSetDataFn,
   IUseCrudSetFn,
@@ -34,6 +35,7 @@ export type IUseFieldRet<T extends object, E, P extends {}, RET = T> = {
   save: IUseCrudSaveFn<RET>;
   setData: IUseCrudSetDataFn<T>;
   actions: IUseCrudActions;
+  setState: IUseCrudRet<T, E, RET>['setState'];
 };
 
 export function useFields<T extends object, E, P extends {}, RET = T>(
@@ -56,7 +58,7 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
     return newData as T;
   }, [schema, data]);
 
-  const [state, setField, save, setData, actions] = useCrud<T, E, RET>(path, defaultData, {
+  const [state, setField, save, setData, actions, setState] = useCrud<T, E, RET>(path, defaultData, {
     disableAutoSave: false,
     ...props,
   });
@@ -82,7 +84,8 @@ export function useFields<T extends object, E, P extends {}, RET = T>(
       save,
       setData,
       actions,
+      setState,
     }),
-    [state, schema, idKey, getField, setField, save, setData, actions]
+    [state, schema, idKey, getField, setField, save, setData, actions, setState]
   );
 }
