@@ -105,6 +105,8 @@ export function useCrud<T extends object, E = any, RET = T>(
         ref.current = getNewState(apiPath, { ...ref.current.data, ...data });
         setState(ref.current);
       } catch (error) {
+        ref.current.busy = false;
+        ref.current.error = error;
         setState((s) => ({ ...s, busy: false, error }));
       }
     },
@@ -121,7 +123,7 @@ export function useCrud<T extends object, E = any, RET = T>(
 
         if (ref.current.busy) {
           queue.current.push({ ...state });
-          return null;
+          return ref.current.data as RET;
         }
 
         if (!ref.current.busy) {
@@ -155,6 +157,7 @@ export function useCrud<T extends object, E = any, RET = T>(
       } catch (error) {
         setState((s) => ({ ...s, busy: false, error }));
         ref.current.busy = false;
+        ref.current.error = error;
         return null;
       }
     },
