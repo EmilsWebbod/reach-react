@@ -102,7 +102,7 @@ export function useCrud<T extends object, E = any, RET = T>(
         }
         const apiPath = `${path}/${id}`;
         const data = await reach.api<T>(apiPath, { ...opts, method });
-        ref.current = getNewState(apiPath, { ...ref.current.data, ...data });
+        ref.current = getNewState(path, { ...ref.current.data, ...data });
         setState(ref.current);
       } catch (error) {
         ref.current.busy = false;
