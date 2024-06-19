@@ -83,6 +83,7 @@ export function useCrud<T extends object, E = any, RET = T>(
   const defaultState = useMemo(
     () => ({
       ...getNewState(path, initialData),
+      dirty: !initialData[props.idKey],
       busy: Boolean(props.initWithGet && initialData[props.idKey]),
     }),
     [path, props.idKey, initialData]
