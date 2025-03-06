@@ -1,6 +1,6 @@
 {
   "name": "@ewb/reach-react",
-  "version": "0.6.22",
+  "version": "0.6.23",
   "description": "React Resource and Fetch stuff",
   "main": "./index.js",
   "types": "./index.d.ts",
@@ -53,5 +53,6 @@
   "homepage": "https://github.com/EmilsWebbod/reach-react#readme",
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
-  }
+  },
+  "packageManager": "pnpm@9.12.0+sha256.a61b67ff6cc97af864564f4442556c22a04f2e5a7714fbee76a1011361d9b726"
 }

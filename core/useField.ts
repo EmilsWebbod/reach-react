@@ -9,24 +9,24 @@ interface State<V, E> {
   value: V;
 }
 
-type IUserFieldRet<V, E, P> = [
+type IUserFieldRet<T extends object, K extends keyof T, E, P> = [
   busy: boolean,
-  state: IUseFieldValueRet<V> & P,
+  state: IUseFieldValueRet<T[K], K> & P,
   error: E | undefined,
-  setValue: (value: V, disableAutoSave?: boolean) => void
+  setValue: (value: T[K], disableAutoSave?: boolean) => void
 ];
 
 export interface IUseFieldProps {
   disableAutoSave?: boolean;
 }
 
-export function useField<T extends object, K extends keyof T & string, E, P>(
+export function useField<T extends object, K extends keyof T, E, P>(
   crud: IUseFieldRet<T, E, P>,
   key: K,
   props: IUseFieldProps = {}
-): IUserFieldRet<T[K], E, P> {
+): IUserFieldRet<T, K, E, P> {
   const { path, data, schema, idKey } = crud.state;
-  const value = useMemo(() => getDotValue(data, key.split('.') as (keyof T)[]) as T[K], [data, key]);
+  const value = useMemo(() => getDotValue(data, String(key).split('.') as (keyof T)[]) as T[K], [data, key]);
   const ref = useRef(value);
   const service = useContext(ReachContext);
   const reach = useMemo(() => new Reach(service), [service]);
@@ -41,8 +41,8 @@ export function useField<T extends object, K extends keyof T & string, E, P>(
     const id = `${data[idKey]}-${key}`;
     const edited = ref.current !== state.value;
     // @ts-ignore
-    return { ...schema[key]!, id, edited, value: state.value };
-  }, [state.value, idKey]);
+    return { ...schema[key]!, key, id, edited, value: state.value };
+  }, [state.value, key, idKey]);
 
   const _id = data[idKey];
   const save = useCallback(
