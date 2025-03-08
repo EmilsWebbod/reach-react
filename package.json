@@ -1,6 +1,6 @@
 {
   "name": "@ewb/reach-react",
-  "version": "0.6.24",
+  "version": "0.6.25",
   "description": "React Resource and Fetch stuff",
   "main": "./index.js",
   "types": "./index.d.ts",

@@ -54,7 +54,11 @@ export type IUseCrudSetFn<T extends object> = <K extends keyof T>(
   disableAutosave?: boolean
 ) => (event: ChangeEvent<ValidEvents> | T[K], meta?: any) => void;
 export type IUseCrudSaveFn<T> = () => Promise<T | null>;
-export type IUseCrudSetDataFn<T extends object> = (data: Partial<T>, meta?: IUseCrudMeta<T>) => void;
+export type IUseCrudSetDataFn<T extends object> = (
+  data: Partial<T>,
+  meta?: IUseCrudMeta<T>,
+  isEdited?: boolean
+) => void;
 export type IUseCrudRet<T extends object, E, RET = T> = [
   IUseCrudState<T, E>,
   IUseCrudSetFn<T>,
