@@ -115,7 +115,7 @@ export function useCrud<T extends object, E = any, RET = T>(
   );
 
   const patch = useCallback(
-    async (state: IUseCrudState<T, E>): Promise<RET | null> => {
+    async (state: IUseCrudState<T, E>, key?: keyof T): Promise<RET | null> => {
       try {
         const id = state.data[props.idKey];
         if (id && !Object.values(state.edited).some(Boolean)) {
@@ -139,7 +139,7 @@ export function useCrud<T extends object, E = any, RET = T>(
         }
 
         if (!props.alwaysPost && (id || props.alwaysPatch)) {
-          const body = getPatchData(state, props.forcePatch);
+          const body = getPatchData(state, props.forcePatch, key);
           data = await reach.api<RET>(apiPath, { ...opts, method: 'PATCH', body });
         } else {
           data = await reach.api<RET>(apiPath, { ...opts, method: 'POST', body: ref.current.data });
@@ -151,7 +151,12 @@ export function useCrud<T extends object, E = any, RET = T>(
           ref.current.busy = false;
           await patch(patchState);
         } else if (!props.dontSetStateOnPost) {
-          ref.current = getNewState(path, data || ref.current.data, {}, ref.current.meta);
+          let edited: Edited<T> = {};
+          if (key) {
+            edited = ref.current.edited;
+            edited[key] = false;
+          }
+          ref.current = getNewState(path, data || ref.current.data, edited, ref.current.meta);
           setState(ref.current);
         }
         return data as RET;
@@ -194,7 +199,7 @@ export function useCrud<T extends object, E = any, RET = T>(
           }
 
           if (!disableAutoSave) {
-            patch(ref.current);
+            patch(ref.current, key);
           }
 
           return ref.current;
@@ -205,13 +210,13 @@ export function useCrud<T extends object, E = any, RET = T>(
 
   const save = useCallback(() => patch(ref.current), [patch]);
 
-  const setData = useCallback((data: Partial<T>, meta: IUseCrudMeta<T> = {}) => {
+  const setData = useCallback((data: Partial<T>, meta: IUseCrudMeta<T> = {}, isEdited = true) => {
     setState((s) => {
       const edited = { ...s.edited };
       // @ts-ignore
       Object.keys(data).forEach((key: keyof T) => {
         if (s.data[key] !== data[key]) {
-          edited[key] = true;
+          edited[key] = isEdited;
         }
       });
       ref.current = getNewState(s.path, { ...s.data, ...data }, edited, { ...s.meta, ...meta });
@@ -240,7 +245,12 @@ export function useCrud<T extends object, E = any, RET = T>(
   }, [state, set, save, setData, actions, setState]);
 }
 
-function getPatchData<T extends object, E>(state: IUseCrudState<T, E>, forcePatch?: (keyof T)[]) {
+function getPatchData<T extends object, E>(state: IUseCrudState<T, E>, forcePatch?: (keyof T)[], key?: keyof T) {
+  if (key) {
+    return {
+      [key]: state.data[key],
+    };
+  }
   const patchData: Partial<T> = {};
   for (const key in state.edited) {
     if (state.edited[key]) {
