@@ -55,6 +55,7 @@ export interface IUseSearchActions<T> {
   push: (...items: T[]) => void;
   map: (fn: (item: T) => T) => void;
   filter: (fn: (item: T) => boolean) => void;
+  set: (items: T[]) => void;
   search: (fetchQuery: IReachQuery) => Promise<T[]>;
 }
 
@@ -193,6 +194,7 @@ export function useSearch<T, E = any, RES = T[]>(
         _page.current = 0;
         return search(props.defaultSkip || 0, query);
       },
+      set: (items: T[]) => setState((s) => ({ ...s, items })),
       map: (fn: (items: T) => T) => setState((s) => ({ ...s, items: s.items.map(fn) })),
       filter: (fn: (item: T) => boolean) => setState((s) => ({ ...s, items: s.items.filter(fn) })),
     }),
