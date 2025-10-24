@@ -192,6 +192,7 @@ export function useSearch<T, E = any, RES = T[]>(
       },
       search: (query: IReachQuery) => {
         _page.current = 0;
+        setState((s) => ({ ...s, busy: true }));
         return search(props.defaultSkip || 0, query);
       },
       set: (items: T[]) => setState((s) => ({ ...s, items })),
