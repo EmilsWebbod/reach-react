@@ -30,6 +30,7 @@ export interface IUseSearchProps<T, E, RES> {
   skipKey?: string;
   limitKey?: string;
   countHeader?: string;
+  searchNextKey?: keyof RES;
 }
 
 export interface IUseSearchState<T, E, RES> extends IUseSearchInfo<RES> {
@@ -98,8 +99,10 @@ export function useSearch<T, E = any, RES = T[]>(
     reachOptions,
     skipPages,
     paginationMode = 'client',
+    searchNextKey,
   } = props;
   const init = useRef(false);
+  const searchNext = useRef('');
   const service = useContext(ReachContext);
   const initialState = useMemo(() => toInitialState<T, E, RES>(props), [props]);
   const [state, setState] = useState<IUseSearchState<T, E, RES>>(initialState);
@@ -125,6 +128,9 @@ export function useSearch<T, E = any, RES = T[]>(
         const newState = getNewStateFromResponse<T, E, RES>(response, json, querySkip, query, countHeader);
         const toNewItems = (s: IUseSearchState<T, E, RES>, items: T[]) =>
           items ? (paginate && paginationMode === 'client' ? [...s.items, ...items] : items) : s.items;
+        if (searchNextKey && searchNextKey in json) {
+          searchNext.current = String(json[searchNextKey]);
+        }
 
         if (typeof responseToData === 'function') {
           let retItems: T[] = [];
@@ -147,18 +153,21 @@ export function useSearch<T, E = any, RES = T[]>(
         return [] as T[];
       }
     },
-    [path, responseToData, reachOptions, skipKey, countHeader, state.limit, skipPages, paginationMode]
+    [path, responseToData, reachOptions, skipKey, countHeader, state.limit, skipPages, paginationMode, searchNextKey]
   );
 
   const next: IUseSearchNextFn<T> = useCallback(
     async (searchQuery?: IReachQuery, page = _page.current + 1) => {
       if (state.items.length < state.count) {
         setState((s) => ({ ...s, busy: true }));
+        if (searchNext.current) {
+          return search(0, { ...searchQuery, [String(searchNextKey)]: searchNext.current });
+        }
         return search(page, searchQuery);
       }
       return null;
     },
-    [state.items.length, state.count, search]
+    [state.items.length, state.count, search, searchNextKey]
   );
 
   const info: IUseSearchInfo<RES> = useMemo(
