@@ -161,7 +161,7 @@ export function useSearch<T, E = any, RES = T[]>(
       if (state.items.length < state.count) {
         setState((s) => ({ ...s, busy: true }));
         if (searchNext.current) {
-          return search(0, { ...searchQuery, [String(searchNextKey)]: searchNext.current });
+          return search(page, { ...searchQuery, [String(searchNextKey)]: searchNext.current });
         }
         return search(page, searchQuery);
       }
